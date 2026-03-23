@@ -1,0 +1,2888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two-Stream Instability Observatory — MMS Live Monitor</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══ DESIGN SYSTEM — CRT Oscilloscope + Plasma Lab (from two_stream.html) ═══ */
+:root{
+  --bg0:#030609;--bg1:#07101a;--bg2:#0a1620;--bg3:#0e1e2e;
+  --border:#0f2a3f;--border2:#1a4060;
+  --phosphor:#39ff14;--amber:#ff9f1c;--ice:#00d4ff;
+  --pink:#ff3e9d;--purple:#b06cff;
+  --text:#c8dde8;--muted:#4a6578;--dim:#1e3040;
+  --glow-g:0 0 10px #39ff1466,0 0 30px #39ff1422;
+  --glow-a:0 0 10px #ff9f1c66,0 0 30px #ff9f1c22;
+  --glow-i:0 0 10px #00d4ff66,0 0 30px #00d4ff22;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg0);color:var(--text);font-family:'Exo 2',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:1000;}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg1);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:900;background:rgba(3,6,9,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;height:50px;gap:2px;flex-wrap:wrap;}
+.nav-brand{font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.15em;color:var(--phosphor);text-shadow:var(--glow-g);text-transform:uppercase;margin-right:auto;white-space:nowrap;}
+.nav-brand span{color:var(--amber);}
+.nav-link{font-family:'Share Tech Mono',monospace;font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:4px;border:1px solid transparent;transition:all .2s;white-space:nowrap;}
+.nav-link:hover,.nav-link.active{color:var(--ice);border-color:var(--border2);background:var(--bg2);}
+
+/* HERO */
+#hero{position:relative;min-height:88vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;}
+.scanline{position:absolute;left:0;right:0;height:2px;background:rgba(57,255,20,.1);animation:scandown 5s linear infinite;pointer-events:none;}
+@keyframes scandown{from{top:-2px}to{top:101%}}
+.hero-content{position:relative;z-index:2;text-align:center;padding:40px 20px;}
+.hero-eyebrow{font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--phosphor);text-shadow:var(--glow-g);margin-bottom:20px;opacity:0;animation:fadeUp .8s .3s ease forwards;}
+.hero-title{font-family:'Orbitron',monospace;font-size:clamp(2rem,5vw,4.5rem);font-weight:900;line-height:1.1;background:linear-gradient(135deg,var(--ice) 0%,var(--phosphor) 50%,var(--amber) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;opacity:0;animation:fadeUp .8s .5s ease forwards;}
+.hero-sub{font-size:1.05rem;font-weight:300;color:#7a9ab0;max-width:560px;margin:0 auto 28px;line-height:1.7;opacity:0;animation:fadeUp .8s .7s ease forwards;}
+.hero-pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp .8s .9s ease forwards;margin-bottom:24px;}
+.hero-pill{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;padding:6px 16px;border-radius:20px;border:1px solid;cursor:pointer;transition:all .2s;}
+.hp-g{border-color:var(--phosphor);color:var(--phosphor);}
+.hp-a{border-color:var(--amber);color:var(--amber);}
+.hp-i{border-color:var(--ice);color:var(--ice);}
+.hp-p{border-color:var(--purple);color:var(--purple);}
+.hero-pill:hover{background:rgba(255,255,255,.05);}
+.hero-scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;animation:pulse 2s infinite;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.2}50%{opacity:.7}}
+
+/* SECTION WRAPPERS */
+.sec{padding:56px 20px;max-width:1300px;margin:0 auto;}
+.sec-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);}
+.section-header{display:flex;align-items:baseline;gap:14px;margin-bottom:30px;border-bottom:1px solid var(--border);padding-bottom:14px;}
+.section-num{font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;color:var(--phosphor);letter-spacing:.2em;text-shadow:var(--glow-g);}
+.section-title{font-family:'Orbitron',monospace;font-size:clamp(1rem,2.5vw,1.4rem);font-weight:700;color:var(--text);letter-spacing:.05em;}
+.section-tag{font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-left:auto;}
+
+/* CARDS */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:22px;margin-bottom:14px;}
+.card-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ice);margin-bottom:14px;}
+
+/* CONTROLS — SLIDERS + NUMBERS (from two_stream.html) */
+.ctrl-row{display:flex;flex-wrap:wrap;gap:18px;margin-bottom:14px;}
+.ctrl-block{display:flex;flex-direction:column;gap:5px;min-width:140px;}
+.ctrl-block label{font-family:'Share Tech Mono',monospace;font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ice);}
+.ctrl-block input[type=range]{width:100%;accent-color:var(--phosphor);cursor:pointer;}
+.ctrl-block input[type=number],.ctrl-block select{background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--amber);font-family:'Share Tech Mono',monospace;font-size:.9rem;padding:5px 10px;outline:none;transition:border-color .2s;width:100%;}
+.ctrl-block input[type=number]:focus,.ctrl-block select:focus{border-color:var(--ice);}
+.ctrl-hint{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);}
+.ctrl-val{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--amber);text-align:right;}
+.slider-row{display:flex;gap:8px;align-items:center;}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.btn{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 20px;border-radius:5px;border:1px solid;cursor:pointer;transition:all .2s;background:transparent;}
+.btn:hover{transform:translateY(-1px);}
+.btn-g{color:var(--phosphor);border-color:var(--phosphor);}
+.btn-g:hover{background:rgba(57,255,20,.1);box-shadow:var(--glow-g);}
+.btn-a{color:var(--amber);border-color:var(--amber);}
+.btn-a:hover{background:rgba(255,159,28,.1);box-shadow:var(--glow-a);}
+.btn-i{color:var(--ice);border-color:var(--ice);}
+.btn-i:hover{background:rgba(0,212,255,.1);box-shadow:var(--glow-i);}
+.btn-p{color:var(--purple);border-color:var(--purple);}
+.btn-p:hover{background:rgba(176,108,255,.1);}
+.btn-sm{padding:5px 14px;font-size:.62rem;}
+
+/* PILLS */
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.pill{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.06em;padding:4px 12px;border-radius:20px;border:1px solid;}
+.pill-ok{background:rgba(57,255,20,.08);border-color:var(--phosphor);color:var(--phosphor);}
+.pill-warn{background:rgba(255,159,28,.08);border-color:var(--amber);color:var(--amber);}
+.pill-bad{background:rgba(255,62,157,.08);border-color:var(--pink);color:var(--pink);}
+.pill-info{background:rgba(0,212,255,.08);border-color:var(--ice);color:var(--ice);}
+.pill-dim{background:rgba(74,101,120,.08);border-color:var(--muted);color:var(--muted);}
+
+/* FORMULA BOX */
+.formula-box{background:rgba(0,0,0,.4);border:1px solid var(--dim);border-left:3px solid var(--purple);border-radius:6px;padding:14px 20px;font-family:'Share Tech Mono',monospace;font-size:.88rem;color:var(--purple);line-height:1.8;margin:10px 0;}
+.formula-box .f-label{font-size:.64rem;color:var(--muted);margin-bottom:4px;}
+
+/* RESULT */
+.result-display{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:14px 18px;margin-top:10px;}
+.result-main{font-family:'Share Tech Mono',monospace;font-size:1.25rem;margin-bottom:8px;}
+.result-green{color:var(--phosphor);text-shadow:var(--glow-g);}
+.result-amber{color:var(--amber);text-shadow:var(--glow-a);}
+.result-table{width:100%;border-collapse:collapse;margin-top:8px;}
+.result-table td{font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:3px 8px;color:var(--muted);border-bottom:1px solid var(--border);}
+.result-table td:first-child{color:var(--ice);width:55%;}
+.plot-wrap{background:var(--bg0);border:1px solid var(--border);border-radius:6px;padding:8px;margin-top:12px;}
+
+/* SCENARIO BUTTONS */
+.scenario-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+@media(max-width:600px){.scenario-grid{grid-template-columns:1fr;}}
+.scenario-btn{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.04em;padding:12px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;text-align:left;transition:all .2s;line-height:1.55;}
+.scenario-btn .sc-eq{color:var(--purple);font-size:.74rem;}
+.scenario-btn .sc-sub{font-size:.61rem;color:var(--dim);}
+.scenario-btn.active{border-color:var(--ice);color:var(--ice);background:rgba(0,212,255,.05);}
+.scenario-btn:hover:not(.active){border-color:var(--border2);color:var(--text);}
+
+/* COLUMNS */
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.col3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:900px){.col2,.col3{grid-template-columns:1fr;}}
+
+/* LORENTZ BAR */
+.lorentz-bar{background:#1a1000;border:1px solid #3a2800;border-radius:8px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.lz-item{display:flex;flex-direction:column;gap:2px;}
+.lz-label{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);text-transform:uppercase;}
+.lz-value{font-family:'Share Tech Mono',monospace;font-size:1rem;color:var(--amber);}
+
+/* STABILITY METER */
+.stability-meter{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--phosphor) 0%,var(--amber) 50%,var(--pink) 100%);margin-top:8px;position:relative;}
+.stability-needle{position:absolute;top:-4px;width:3px;height:14px;border-radius:2px;background:white;transform:translateX(-50%);transition:left .5s ease;box-shadow:0 0 6px white;}
+
+/* INSIGHTS PANEL */
+.insights-panel{background:linear-gradient(135deg,rgba(57,255,20,.03),rgba(0,212,255,.03));border:1px solid var(--border2);border-top:2px solid var(--phosphor);border-radius:6px;padding:18px;font-size:.9rem;line-height:1.8;color:#8fb5c8;}
+.insight-title{font-family:'Share Tech Mono',monospace;font-size:.63rem;letter-spacing:.15em;text-transform:uppercase;color:var(--phosphor);margin-bottom:10px;}
+.insight-val{color:var(--amber);font-family:'Share Tech Mono',monospace;}
+.insight-pos{color:var(--phosphor);}
+.insight-neg{color:var(--pink);}
+
+/* GROWTH CALC (from growth_calc.html adapted dark) */
+.gc-formula-disp{background:rgba(0,0,0,.4);border:1px solid var(--dim);border-left:3px solid var(--purple);border-radius:6px;padding:14px 20px;margin-bottom:14px;text-align:center;}
+.gc-formula-name{font-size:.78rem;color:var(--muted);margin-bottom:6px;}
+.gc-formula-eq{font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--purple);word-break:break-all;}
+.gc-input-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:12px;}
+@media(max-width:700px){.gc-input-grid{grid-template-columns:1fr;}}
+.gc-input-group{display:flex;flex-direction:column;gap:5px;}
+.gc-input-group label{font-family:'Share Tech Mono',monospace;font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ice);}
+.gc-input-group input{background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--amber);font-family:'Share Tech Mono',monospace;font-size:.9rem;padding:6px 10px;outline:none;transition:border-color .2s;}
+.gc-input-group input:focus{border-color:var(--ice);}
+.gc-lorentz{background:#1a1000;border:1px solid #3a2800;border-radius:8px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.gc-lz-lbl{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);}
+.gc-lz-val{font-family:'Share Tech Mono',monospace;font-size:1rem;color:var(--amber);}
+.gc-result{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:14px 18px;margin-bottom:14px;}
+.gc-result-val{font-family:'Share Tech Mono',monospace;font-size:1.3rem;margin-bottom:8px;}
+.gc-result-detail{font-family:'Share Tech Mono',monospace;font-size:.73rem;color:var(--muted);line-height:1.8;}
+.gc-result-detail strong{color:var(--ice);}
+.gc-intermediate{margin-top:10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--dim);line-height:1.8;}
+.gc-intermediate .gi-title{color:var(--muted);margin-bottom:4px;font-size:.65rem;}
+.gc-validation{background:#1f1500;border:1px solid #f9a825;border-radius:5px;padding:7px 12px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#f9a825;margin-bottom:10px;}
+.gc-note{background:#0d1a10;border:1px solid #2a4a2a;border-radius:5px;padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#80b070;line-height:1.6;margin-bottom:12px;}
+
+/* SIMULATION BOX */
+.sim-wrap{background:var(--bg0);border:1px solid var(--border2);border-radius:8px;padding:8px;overflow:hidden;}
+.status-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.note-box{background:#0d1a10;border:1px solid #2a4a2a;border-radius:7px;padding:9px 14px;margin-bottom:12px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#80b070;line-height:1.6;}
+.val-warn{background:#1f1500;border:1px solid #f9a825;border-radius:6px;padding:8px 14px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#f9a825;margin-top:8px;}
+.legend-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+@media(max-width:700px){.legend-grid{grid-template-columns:1fr;}}
+.legend-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.legend-card h3{font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--ice);text-transform:uppercase;margin-bottom:6px;}
+.legend-card p{font-size:.86rem;color:#aab4c4;line-height:1.6;}
+code{font-family:'Share Tech Mono',monospace;font-size:.76rem;color:#f9c74f;background:#1a2235;padding:1px 4px;border-radius:3px;}
+.kcut-table{width:100%;border-collapse:collapse;margin-top:10px;}
+.kcut-table th,.kcut-table td{font-family:'Share Tech Mono',monospace;font-size:.7rem;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.kcut-table th{color:var(--ice);}
+.multi-ctrl{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.multi-ctrl label{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--ice);display:flex;align-items:center;gap:6px;cursor:pointer;}
+.multi-ctrl input[type=checkbox]{accent-color:var(--ice);width:14px;height:14px;}
+.v0-check{font-family:'Share Tech Mono',monospace;font-size:.68rem;display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px;border-radius:4px;border:1px solid var(--border);transition:all .2s;}
+.v0-check:hover{border-color:var(--border2);}
+.v0-check input{accent-color:var(--ice);}
+
+/* PHASE SPACE (from two_stream.html exactly) */
+#phase-canvas-container{position:relative;background:var(--bg0);border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
+#phase-canvas{width:100%;display:block;}
+.phase-overlay-label{position:absolute;top:10px;left:14px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);}
+.phase-time-label{position:absolute;top:10px;right:14px;font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--phosphor);text-shadow:var(--glow-g);}
+
+/* EXPERIMENT LOG */
+.exp-log{font-family:'Share Tech Mono',monospace;font-size:.71rem;color:var(--muted);background:var(--bg0);border:1px solid var(--border);border-radius:6px;padding:12px;max-height:220px;overflow-y:auto;line-height:1.9;}
+.exp-row{display:flex;gap:10px;border-bottom:1px solid var(--border);padding:4px 0;align-items:center;}
+.exp-row:last-child{border:none;}
+.exp-id{color:var(--dim);width:22px;}
+.exp-v0{color:var(--amber);width:64px;}
+.exp-k{color:var(--ice);width:54px;}
+.exp-gamma{width:108px;}
+.exp-type{color:var(--muted);}
+.exp-del{color:var(--pink);cursor:pointer;margin-left:auto;}
+.exp-del:hover{opacity:.7;}
+
+/* SIM DATA TABLE */
+.sim-data-table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:.7rem;}
+.sim-data-table th{color:var(--ice);padding:5px 10px;border-bottom:1px solid var(--border2);text-align:left;}
+.sim-data-table td{color:var(--muted);padding:3px 10px;border-bottom:1px solid var(--border);}
+
+/* FAQ */
+.faq-item{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+.faq-q{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text);padding:13px 17px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:var(--bg1);transition:background .2s;}
+.faq-q:hover{background:var(--bg2);color:var(--ice);}
+.faq-q.open{color:var(--ice);}
+.faq-q .arrow{color:var(--muted);transition:transform .25s;font-size:.65rem;}
+.faq-q.open .arrow{transform:rotate(180deg);}
+.faq-a{font-size:.88rem;line-height:1.8;color:#7a9ab0;padding:0 17px;max-height:0;overflow:hidden;transition:max-height .4s ease,padding .25s;background:var(--bg0);}
+.faq-a.open{max-height:500px;padding:14px 17px;}
+.faq-a strong{color:var(--amber);}
+.faq-a em{color:var(--phosphor);font-style:normal;}
+
+/* MODE TOGGLE */
+.mode-toggle{display:flex;margin-left:auto;}
+.mode-btn{font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:5px 13px;border:1px solid var(--border2);cursor:pointer;background:transparent;color:var(--muted);transition:all .2s;}
+.mode-btn:first-child{border-radius:4px 0 0 4px;border-right:none;}
+.mode-btn:last-child{border-radius:0 4px 4px 0;}
+.mode-btn.active{background:var(--bg2);color:var(--ice);border-color:var(--ice);}
+
+/* CONCEPT CARDS */
+.concept-card{background:var(--bg1);border:1px solid var(--border);border-radius:10px;padding:20px;transition:border-color .25s,transform .2s;}
+.concept-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.concept-icon{font-size:1.8rem;margin-bottom:10px;}
+.concept-card h3{font-family:'Share Tech Mono',monospace;font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ice);margin-bottom:8px;}
+.concept-card p{font-size:.88rem;line-height:1.75;color:#7a9ab0;}
+.concept-card .eq{font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--purple);background:#0a0f1e;border:1px solid #1a2040;border-radius:5px;padding:7px 12px;margin-top:8px;text-align:center;}
+
+.hidden{display:none!important;}
+footer{background:var(--bg1);border-top:1px solid var(--border);padding:24px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--muted);}
+footer span{color:var(--phosphor);}
+</style>
+/* ═══ ADDITIONAL: Observatory Sections ═══ */
+.obs-section{padding:64px 24px;max-width:1340px;margin:0 auto;}
+.obs-divider{height:2px;background:linear-gradient(90deg,transparent,var(--border2) 30%,var(--ice) 50%,var(--border2) 70%,transparent);margin:0;}
+
+/* BIG FONTS */
+.big-section-title{font-family:'Orbitron',monospace;font-size:clamp(1.2rem,3vw,2rem);font-weight:900;color:var(--text);letter-spacing:.06em;}
+.big-label{font-family:'Share Tech Mono',monospace;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ice);margin-bottom:10px;}
+body{font-size:15px;}
+.card p{font-size:.95rem;line-height:1.8;}
+.formula-box{font-size:.95rem!important;}
+.result-main{font-size:1.5rem!important;}
+.kpi-val{font-size:2rem!important;}
+
+/* MISSION STATEMENT */
+.mission-box{background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(57,255,20,.04));border:1px solid var(--border2);border-radius:12px;padding:32px;margin-bottom:20px;}
+.mission-title{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,var(--ice),var(--phosphor));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;}
+.mission-body{font-size:1.05rem;line-height:1.9;color:#a0c4d8;}
+
+/* STATUS CARDS */
+.status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:20px 0;}
+.status-card{background:var(--bg1);border:1px solid var(--border);border-radius:10px;padding:18px;transition:border-color .3s;}
+.status-card.active{border-color:var(--phosphor);box-shadow:var(--glow-g);}
+.status-card.probable{border-color:var(--amber);box-shadow:var(--glow-a);}
+.status-card.none{border-color:var(--muted);}
+.status-icon{font-size:2rem;margin-bottom:8px;}
+.status-label{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+.status-value{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;margin-top:4px;}
+
+/* TIMESTAMP BADGE */
+.timestamp-badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 16px;font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--ice);margin-bottom:20px;}
+.ts-live{color:var(--phosphor);}
+
+/* THEORY VALIDATION */
+.theory-card{background:linear-gradient(135deg,rgba(176,108,255,.04),rgba(0,212,255,.04));border:1px solid;border-radius:10px;padding:22px;margin-bottom:14px;}
+.tc-eq18{border-color:var(--amber);}
+.tc-eq19{border-color:var(--ice);}
+.tc-eq20{border-color:var(--phosphor);}
+.tc-eq21{border-color:var(--purple);}
+.theory-title{font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;margin-bottom:10px;}
+.theory-result{font-family:'Share Tech Mono',monospace;font-size:1.1rem;margin:8px 0;}
+
+/* EVENT CARDS */
+.event-card{background:var(--bg1);border-radius:10px;padding:20px;margin-bottom:14px;border-left:4px solid;}
+.event-high{border-color:var(--pink);}
+.event-moderate{border-color:var(--amber);}
+.event-time{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:8px;}
+.event-type{font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;margin-bottom:8px;}
+.event-body{font-size:.92rem;line-height:1.75;color:#8fb5c8;}
+
+/* HISTORY CHARTS */
+.hist-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:800px){.hist-chart-grid{grid-template-columns:1fr;}}
+.hist-card{background:var(--bg1);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.hist-card h4{font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+.hist-caption{font-size:.82rem;color:var(--muted);margin-bottom:12px;line-height:1.55;}
+
+/* PARAMETER TABLE */
+.param-table{width:100%;border-collapse:collapse;}
+.param-table th{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ice);padding:8px 12px;border-bottom:2px solid var(--border2);text-align:left;}
+.param-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:.9rem;}
+.param-table td:first-child{font-family:'Share Tech Mono',monospace;color:var(--amber);}
+.param-table td:nth-child(2){font-family:'Share Tech Mono',monospace;color:var(--phosphor);font-size:1rem;}
+.param-table tr:hover td{background:var(--bg2);}
+
+/* KPI GRID LARGER */
+.kpi-grid-lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin:16px 0;}
+.kpi-lg{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.kpi-lg .val{font-family:'Share Tech Mono',monospace;font-size:1.8rem;line-height:1.2;}
+.kpi-lg .lbl{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:5px;}
+.kpi-lg .note{font-size:.78rem;color:var(--text);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);line-height:1.5;}
+
+/* DETECTION RESULT */
+.detect-banner{border-radius:10px;padding:20px 24px;margin:16px 0;display:flex;align-items:flex-start;gap:16px;border:1px solid;}
+.db-active{background:rgba(57,255,20,.06);border-color:var(--phosphor);}
+.db-probable{background:rgba(255,159,28,.06);border-color:var(--amber);}
+.db-quiet{background:rgba(74,101,120,.06);border-color:var(--muted);}
+.db-icon{font-size:2.5rem;flex-shrink:0;}
+.db-content h3{font-family:'Orbitron',monospace;font-size:1.05rem;font-weight:700;margin-bottom:6px;}
+.db-content p{font-size:.92rem;line-height:1.75;color:#8fb5c8;}
+
+/* SECTION NUMBERS — bigger */
+.section-num{font-size:.85rem!important;}
+.section-title{font-size:clamp(1.1rem,3vw,1.6rem)!important;}
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAVIGATION ══════════ -->
+<nav>
+  <div class="nav-brand">Two-Stream <span>Lab</span></div>
+  <a class="nav-link" href="#intro">Intro</a>
+  <a class="nav-link" href="#growth-calc">Calculator</a>
+  <a class="nav-link" href="#growth-lab">Live Lab</a>
+  <a class="nav-link" href="#compare">Compare</a>
+  <a class="nav-link" href="#sim-box">Sim Box</a>
+  <a class="nav-link" href="#phase-space">Phase Space</a>
+  <a class="nav-link" href="#playground">Playground</a>
+  <a class="nav-link" href="#faq">FAQ</a>
+  <div style="flex:1"></div>
+  <a class="nav-link" href="#mms-observatory" style="color:var(--phosphor);border-color:var(--phosphor);">🛰 Live Data</a>
+  <a class="nav-link" href="#history-6mo">6-Month History</a>
+  <a class="nav-link" href="#events-log">Events</a>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="scanline"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Plasma Physics · Interactive Research Laboratory</div>
+    <h1 class="hero-title">Two-Stream<br>Instability</h1>
+    <p class="hero-sub">Counter-propagating electron beams drive exponential electrostatic wave growth. Explore dispersion relations, growth rates, SMILEI PIC data, simulation box design, and live phase-space evolution — all interactive.</p>
+    <div class="hero-pills">
+      <span class="hero-pill hp-g">Non-Relativistic Eq.18</span>
+      <span class="hero-pill hp-a">Relativistic Eq.19</span>
+      <span class="hero-pill hp-i">Multi-Species Eq.20–21</span>
+      <span class="hero-pill hp-p">SMILEI PIC Verified</span>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">▼ scroll to explore</div>
+</section>
+
+
+<div class="obs-divider"></div>
+
+<!-- ══════ MISSION STATEMENT ══════ -->
+<div class="obs-section" id="mission">
+  <div class="mission-box">
+    <div class="mission-title">Our Goal — What This Observatory Does</div>
+    <p class="mission-body">
+      This is a <strong style="color:var(--ice)">live research tool</strong> for detecting and studying
+      the <strong style="color:var(--amber)">two-stream instability (TSI)</strong> in real NASA spacecraft data.
+      We combine rigorous theoretical analysis with direct MMS observations to answer a fundamental question:
+      <em style="color:var(--phosphor)">when two electron beams collide in the magnetosphere,
+      can we see the instability grow in real time?</em>
+    </p>
+    <p class="mission-body">
+      The page has two complementary parts. The <strong style="color:var(--amber)">Theory Laboratory</strong>
+      (sections 01–07 below) contains the exact dispersion equations from our paper —
+      non-relativistic and relativistic, single and multi-species.
+      The <strong style="color:var(--ice)">MMS Observatory</strong>
+      (sections 08 onward) downloads real magnetic and plasma data from
+      NASA's MMS-1 spacecraft every 6 hours and tests whether the theoretical
+      conditions for instability are actually met.
+    </p>
+    <p class="mission-body">
+      We specifically search for four observational signatures of TSI:
+      (1) <strong style="color:var(--phosphor)">electron holes</strong> — bipolar E∥ pulses from nonlinear saturation;
+      (2) a <strong style="color:var(--amber)">positive df/dv</strong> slope in the electron distribution (bump-on-tail);
+      (3) the <strong style="color:var(--ice)">TSI→Weibel causal chain</strong> — does beam activity precede temperature anisotropy?;
+      (4) <strong style="color:var(--purple)">Langmuir wave enhancement</strong> near the plasma frequency.
+      We also log unusual plasma events and validate measured growth rates
+      against predictions from Equations 18–21.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+      <span class="pill pill-info">Equations 18–21 (Shrivastav+ 2025)</span>
+      <span class="pill pill-ok">SMILEI PIC Validated</span>
+      <span class="pill pill-warn">NASA MMS-1 Live Data</span>
+      <span class="pill pill-info">Updates Every 6 Hours</span>
+      <span class="pill pill-dim">~90 Day Data Latency</span>
+    </div>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+<div class="sec-divider"></div>
+
+<!-- ══════════ SECTION 1 — INTRO ══════════ -->
+<div class="sec" id="intro">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Physics Concepts</h2>
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('beginner',this)">Beginner</button>
+      <button class="mode-btn" onclick="setMode('expert',this)">Expert</button>
+    </div>
+  </div>
+
+  <div id="concepts-beginner" class="col3" style="margin-bottom:20px;">
+    <div class="concept-card">
+      <div class="concept-icon">⚡</div>
+      <h3>The Setup</h3>
+      <p>Two beams of electrons travel in opposite directions at ±v₀. Each carries half the total density. A tiny density perturbation δn·cos(kx) seeds the instability.</p>
+      <div class="eq">n±(x) = n₀/2 · [1 + δn·cos(kx)]</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">📈</div>
+      <h3>Why It Grows</h3>
+      <p>When the resonance condition ω/k ≈ v₀ is met, particles and electric waves exchange energy coherently. Small perturbations amplify exponentially at rate γ.</p>
+      <div class="eq">E(t) ∝ e^(γt)  →  Im(ω) = γ > 0</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🌀</div>
+      <h3>Nonlinear Saturation</h3>
+      <p>Growth stops when particles become trapped in wave potential wells — "cat's eye" vortices in x–pₓ phase space. Beam energy converts to wave energy, then heat.</p>
+      <div class="eq">t_sat ~ 3/γ · ln(1/δn)</div>
+    </div>
+  </div>
+
+  <div id="concepts-expert" class="hidden col2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-label">Single-Species Dispersion (Ions frozen)</div>
+      <div class="formula-box"><div class="f-label">Eq.(18) — Non-relativistic (γ₀=1)</div>γ = √{ ½[2v₀²k² + ω²ₚ − √(8v₀²k²ω²ₚ + ω⁴ₚ)] }</div>
+      <div class="formula-box"><div class="f-label">Eq.(19) — Relativistic (γ₀=1/√(1−v₀²))</div>γ = √{ ½[2v₀²k² + ω²ₚ/γ₀³ − √(8v₀²k²ω²ₚ/γ₀³ + ω⁴ₚ/γ₀⁶)] }</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Multi-Species Dispersion (Mobile ions)</div>
+      <div class="formula-box"><div class="f-label">Eq.(20) — Non-relativistic Multi</div>γ = √{ ½[2v₀²k² + 2ω²ₚ − √(16v₀²k²ω²ₚ + 4ω⁴ₚ)] }</div>
+      <div class="formula-box"><div class="f-label">Eq.(21) — Relativistic Multi</div>γ = √{ ½[2v₀²k² + 2ω²ₚ/γ₀³ − √(16v₀²k²ω²ₚ/γ₀³ + 4ω⁴ₚ/γ₀⁶)] }</div>
+    </div>
+  </div>
+
+  <div class="insights-panel" id="global-insight">
+    <div class="insight-title">⚡ Live Physics Insight</div>
+    <span id="insight-text">Adjust parameters in the Growth Lab — real-time physics interpretation appears here.</span>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+
+<!-- ══════════ SECTION 2 — GROWTH RATE CALCULATOR (exact from growth_calc.html) ══════════ -->
+<div class="sec" id="growth-calc">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Growth Rate Calculator</h2>
+    <span class="section-tag">Exact equations from paper</span>
+  </div>
+
+  <div class="gc-note">ℹ Using natural units where c = 1. Lorentz factor γ₀ is automatically calculated as γ₀ = 1/√(1−v₀²). The growth rate γ is real (imaginary ω) when the dispersion bracket is negative.</div>
+
+  <div class="card">
+    <div class="card-label">Select Formula</div>
+    <div class="ctrl-row" style="margin-bottom:12px;">
+      <div class="ctrl-block" style="flex:2;min-width:260px;">
+        <label>Formula / Regime</label>
+        <select id="gc-formulaType" onchange="gcUpdateFormula()">
+          <option value="non-rel-single">Eq.(18) — Non-relativistic Single-species</option>
+          <option value="rel-single">Eq.(19) — Relativistic Single-species</option>
+          <option value="non-rel-multi">Eq.(20) — Non-relativistic Multi-species</option>
+          <option value="rel-multi">Eq.(21) — Relativistic Multi-species</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="gc-formula-disp" id="gc-formulaDisplay"></div>
+    <div class="gc-lorentz hidden" id="gc-lorentzDisplay">
+      <span class="gc-lz-lbl">Calculated Lorentz Factor:</span>
+      <span class="gc-lz-val" id="gc-lorentzValue"></span>
+    </div>
+    <div class="gc-validation hidden" id="gc-validationMessages"><span id="gc-validationText"></span></div>
+
+    <!-- Inputs with SLIDERS (added interactivity) -->
+    <div class="col3" style="margin-bottom:14px;">
+      <div class="ctrl-block">
+        <label>v₀ — Beam Velocity (c=1)</label>
+        <div class="slider-row">
+          <input type="range" id="gc-sl-v0" min="0.01" max="0.99" step="0.01" value="0.3" oninput="gcSyncNum('v0')">
+          <span class="ctrl-val" id="gc-disp-v0">0.30</span>
+        </div>
+        <input type="number" id="gc-v0" value="0.3" step="0.01" min="0.01" max="0.99" oninput="gcSyncSlider('v0');gcUpdateLorentz()">
+      </div>
+      <div class="ctrl-block">
+        <label>ωₚ — Plasma Frequency</label>
+        <div class="slider-row">
+          <input type="range" id="gc-sl-wp" min="0.1" max="3.0" step="0.05" value="1.0" oninput="gcSyncNum('wp')">
+          <span class="ctrl-val" id="gc-disp-wp">1.00</span>
+        </div>
+        <input type="number" id="gc-wp" value="1.0" step="0.1" min="0.01" oninput="gcSyncSlider('wp')">
+      </div>
+      <div class="ctrl-block">
+        <label>k — Wave Number</label>
+        <div class="slider-row">
+          <input type="range" id="gc-sl-k" min="0.01" max="10" step="0.01" value="1.0" oninput="gcSyncNum('k')">
+          <span class="ctrl-val" id="gc-disp-k">1.00</span>
+        </div>
+        <input type="number" id="gc-k" value="1.0" step="0.05" min="0.001" oninput="gcSyncSlider('k')">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-g btn-sm" onclick="gcCalculateSingle()">Calculate Single Point</button>
+      <button class="btn btn-p btn-sm" onclick="gcGeneratePlot()">Generate Plot vs k</button>
+      <button class="btn btn-i btn-sm hidden" id="gc-exportBtn" onclick="gcExportData()">Export CSV</button>
+    </div>
+  </div>
+
+  <div class="gc-result hidden" id="gc-singleResult">
+    <div class="gc-result-val" id="gc-resultValue"></div>
+    <div class="gc-result-detail" id="gc-resultDetails"></div>
+    <div class="gc-intermediate">
+      <div class="gi-title">Intermediate Calculations:</div>
+      <div id="gc-intermediateValues"></div>
+    </div>
+  </div>
+
+  <div class="plot-wrap hidden" id="gc-plotContainer">
+    <div id="gc-plot" style="width:100%;height:500px;"></div>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+
+<!-- ══════════ SECTION 3 — LIVE GROWTH LAB (from two_stream.html — sliders + real-time) ══════════ -->
+<div class="sec" id="growth-lab">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Live Growth Rate Lab</h2>
+    <span class="section-tag">Real-time γ(k) — auto-updates</span>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Select Regime</div>
+    <div class="scenario-grid">
+      <button class="scenario-btn active" id="sc-nrs" onclick="setScenario('non-rel-single',this)">Non-relativistic Single-species<div class="sc-eq">Eq.(18)</div><div class="sc-sub">Ions frozen · classical · γ₀=1</div></button>
+      <button class="scenario-btn" id="sc-rs" onclick="setScenario('rel-single',this)">Relativistic Single-species<div class="sc-eq">Eq.(19)</div><div class="sc-sub">Ions frozen · γ₀³ Lorentz correction</div></button>
+      <button class="scenario-btn" id="sc-nrm" onclick="setScenario('non-rel-multi',this)">Non-relativistic Multi-species<div class="sc-eq">Eq.(20)</div><div class="sc-sub">e⁻ + ions evolving · classical</div></button>
+      <button class="scenario-btn" id="sc-rm" onclick="setScenario('rel-multi',this)">Relativistic Multi-species<div class="sc-eq">Eq.(21)</div><div class="sc-sub">e⁻ + ions evolving · γ₀³ correction</div></button>
+    </div>
+  </div>
+
+  <div class="col2">
+    <div class="card">
+      <div class="card-label">Parameters — Drag Slider or Type Value</div>
+      <div class="lorentz-bar hidden" id="lorentz-bar">
+        <div class="lz-item"><span class="lz-label">Lorentz γ₀</span><span class="lz-value" id="lz-g0">—</span></div>
+        <div class="lz-item"><span class="lz-label">γ₀³</span><span class="lz-value" id="lz-g03">—</span></div>
+        <div class="lz-item"><span class="lz-label">β=v₀/c</span><span class="lz-value" id="lz-beta">—</span></div>
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-block" style="flex:1;min-width:200px;">
+          <label>Beam Velocity v₀</label>
+          <div class="slider-row"><input type="range" id="sl-v0" min="0.05" max="0.99" step="0.01" value="0.3" oninput="syncNum('v0');calcAuto()"><span class="ctrl-val" id="disp-v0">0.30</span></div>
+          <input type="number" id="num-v0" value="0.3" step="0.01" min="0.05" max="0.99" oninput="syncSlider('v0');calcAuto()">
+          <span class="ctrl-hint">units of c</span>
+        </div>
+        <div class="ctrl-block" style="flex:1;min-width:200px;">
+          <label>Plasma Frequency ωₚ</label>
+          <div class="slider-row"><input type="range" id="sl-wp" min="0.1" max="3.0" step="0.05" value="1.0" oninput="syncNum('wp');calcAuto()"><span class="ctrl-val" id="disp-wp">1.00</span></div>
+          <input type="number" id="num-wp" value="1.0" step="0.1" min="0.01" oninput="syncSlider('wp');calcAuto()">
+          <span class="ctrl-hint">normalized units</span>
+        </div>
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-block" style="flex:1;min-width:200px;">
+          <label>Wavenumber k (single point)</label>
+          <div class="slider-row"><input type="range" id="sl-k" min="0.01" max="10" step="0.01" value="1.0" oninput="syncNum('k');calcSingleLive()"><span class="ctrl-val" id="disp-k">1.00</span></div>
+          <input type="number" id="num-k" value="1.0" step="0.05" min="0.001" oninput="syncSlider('k');calcSingleLive()">
+          <span class="ctrl-hint">ωₚ/c</span>
+        </div>
+        <div class="ctrl-block" style="flex:1;min-width:200px;">
+          <label>k-axis max (plot range)</label>
+          <div class="slider-row"><input type="range" id="sl-kmax" min="1" max="15" step="0.5" value="5" oninput="syncNum('kmax');calcAuto()"><span class="ctrl-val" id="disp-kmax">5.0</span></div>
+          <input type="number" id="num-kmax" value="5" step="0.5" min="0.5" oninput="syncSlider('kmax');calcAuto()">
+          <span class="ctrl-hint">upper k limit</span>
+        </div>
+      </div>
+      <div class="formula-box"><div class="f-label" id="gr-fname">Non-relativistic Single-species (Eq.18)</div><span id="gr-feq">γ = √{ ½[2v₀²k² + ω²ₚ − √(8v₀²k²ω²ₚ + ω⁴ₚ)] }</span></div>
+      <div class="result-display">
+        <div class="result-main" id="gr-result-val">—</div>
+        <table class="result-table" id="gr-result-tbl"></table>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:4px;">STABILITY METER</div>
+        <div class="stability-meter"><div class="stability-needle" id="stability-needle"></div></div>
+        <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:.56rem;color:var(--muted);margin-top:2px;"><span>STABLE</span><span>MARGINAL</span><span>UNSTABLE</span></div>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn btn-g btn-sm" onclick="calcPlot()">Plot γ(k)</button>
+        <button class="btn btn-a btn-sm" onclick="saveToPlayground()">Save Run</button>
+        <button class="btn btn-i btn-sm hidden" id="gr-export-btn" onclick="exportGrowthCSV()">Export CSV</button>
+      </div>
+    </div>
+    <div class="card" style="padding:12px;">
+      <div class="card-label">γ vs k — Growth Rate Curve (live)</div>
+      <div class="plot-wrap" style="margin-top:0;"><div id="gr-plot" style="width:100%;height:420px;"></div></div>
+      <div class="pill-row" style="margin-top:8px;" id="gr-pills"></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+
+<!-- ══════════ SECTION 4 — COMPARISON (from two_stream.html comparison section) ══════════ -->
+<div class="sec" id="compare">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Multi-Curve Comparison</h2>
+    <span class="section-tag">All 4 regimes + PIC data</span>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Parameters &amp; Overlay Options</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block" style="min-width:180px;">
+        <label>Beam Velocity v₀</label>
+        <div class="slider-row"><input type="range" id="cmp-v0-sl" min="0.05" max="0.99" step="0.01" value="0.6" oninput="syncNum('cmpv0');genCompare()"><span class="ctrl-val" id="disp-cmpv0">0.60</span></div>
+        <input type="number" id="cmp-v0" value="0.6" step="0.01" min="0.05" max="0.99" oninput="syncSlider('cmpv0');genCompare()">
+      </div>
+      <div class="ctrl-block" style="min-width:140px;">
+        <label>Plasma Freq ωₚ</label>
+        <div class="slider-row"><input type="range" id="cmp-wp-sl" min="0.1" max="3" step="0.05" value="1.0" oninput="document.getElementById('cmp-wp').value=this.value;genCompare()"><span class="ctrl-val" id="disp-cmpwp">1.00</span></div>
+        <input type="number" id="cmp-wp" value="1.0" step="0.1" min="0.01" oninput="document.getElementById('cmp-wp-sl').value=this.value;document.getElementById('disp-cmpwp').textContent=parseFloat(this.value).toFixed(2);genCompare()">
+      </div>
+      <div class="ctrl-block" style="min-width:120px;">
+        <label>k max</label>
+        <div class="slider-row"><input type="range" id="cmp-kmax-sl" min="0.5" max="10" step="0.5" value="3" oninput="document.getElementById('cmp-kmax').value=this.value;document.getElementById('disp-cmpkmax').textContent=parseFloat(this.value).toFixed(1);genCompare()"><span class="ctrl-val" id="disp-cmpkmax">3.0</span></div>
+        <input type="number" id="cmp-kmax" value="3" step="0.5" min="0.5" oninput="document.getElementById('cmp-kmax-sl').value=this.value;genCompare()">
+      </div>
+      <div class="ctrl-block" style="min-width:180px;">
+        <label>Show Scenarios</label>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:4px;">
+          <label class="v0-check"><input type="checkbox" id="cmp-nrs" checked onchange="genCompare()"> Eq.18 NR-Single</label>
+          <label class="v0-check"><input type="checkbox" id="cmp-rs"  checked onchange="genCompare()"> Eq.19 Rel-Single</label>
+          <label class="v0-check"><input type="checkbox" id="cmp-nrm" checked onchange="genCompare()"> Eq.20 NR-Multi</label>
+          <label class="v0-check"><input type="checkbox" id="cmp-rm"  checked onchange="genCompare()"> Eq.21 Rel-Multi</label>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-g btn-sm" onclick="genCompare()">Refresh</button>
+      <button class="btn btn-i btn-sm hidden" id="cmp-export" onclick="exportCompareCsv()">Export CSV</button>
+    </div>
+  </div>
+
+  <div class="plot-wrap"><div id="cmp-plot" style="width:100%;height:480px;"></div></div>
+  <div id="cmp-kcut-div" style="margin-top:10px;"></div>
+
+  <!-- Simulation data -->
+  <div class="card" style="margin-top:20px;">
+    <div class="card-label">SMILEI PIC Simulation Data — Growth Rate vs k</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block">
+        <label>Select v₀</label>
+        <select id="sim-v0-sel" onchange="plotSimData()">
+          <option value="0.1">v₀ = 0.1</option><option value="0.2">v₀ = 0.2</option>
+          <option value="0.3">v₀ = 0.3</option><option value="0.4">v₀ = 0.4</option>
+          <option value="0.5">v₀ = 0.5</option><option value="0.6" selected>v₀ = 0.6</option>
+          <option value="0.7">v₀ = 0.7</option><option value="0.8">v₀ = 0.8</option>
+          <option value="0.9">v₀ = 0.9</option><option value="0.95">v₀ = 0.95</option>
+        </select>
+      </div>
+      <div class="ctrl-block">
+        <label>Overlays</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+          <label class="v0-check"><input type="checkbox" id="sim-show-nr" checked onchange="plotSimData()"> NR curve</label>
+          <label class="v0-check"><input type="checkbox" id="sim-show-rel" checked onchange="plotSimData()"> Rel curve</label>
+          <label class="v0-check"><input type="checkbox" id="sim-show-sim" checked onchange="plotSimData()"> Sim pts</label>
+          <label class="v0-check"><input type="checkbox" id="sim-show-ana" checked onchange="plotSimData()"> Ana pts</label>
+        </div>
+      </div>
+    </div>
+    <div class="plot-wrap"><div id="sim-plot" style="width:100%;height:400px;"></div></div>
+    <div id="sim-data-table-wrap" style="margin-top:10px;overflow-x:auto;"></div>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+
+<!-- ══════════ SECTION 5 — SIMULATION BOX (exact from simulation-box.html) ══════════ -->
+<div class="sec" id="sim-box">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Simulation Box Designer</h2>
+    <span class="section-tag">SMILEI PIC parameters</span>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Parameters — Drag Sliders or Type Values</div>
+    <div class="ctrl-row">
+      <div class="ctrl-block" style="min-width:160px;">
+        <label>Wavenumber k</label>
+        <div class="slider-row"><input type="range" id="b-k-sl" min="0.01" max="5" step="0.05" value="0.1" oninput="document.getElementById('b-k').value=this.value;document.getElementById('disp-bk').textContent=parseFloat(this.value).toFixed(2);drawBox()"><span class="ctrl-val" id="disp-bk">0.10</span></div>
+        <input type="number" id="b-k" value="0.1" step="0.05" min="0.01" max="5" oninput="document.getElementById('b-k-sl').value=this.value;document.getElementById('disp-bk').textContent=parseFloat(this.value).toFixed(2);drawBox()">
+        <span class="ctrl-hint">ω_pe / c</span>
+      </div>
+      <div class="ctrl-block" style="min-width:160px;">
+        <label>Beam velocity v₀</label>
+        <div class="slider-row"><input type="range" id="b-v-sl" min="0.05" max="0.99" step="0.01" value="0.6" oninput="document.getElementById('b-v').value=this.value;document.getElementById('disp-bv').textContent=parseFloat(this.value).toFixed(2);drawBox()"><span class="ctrl-val" id="disp-bv">0.60</span></div>
+        <input type="number" id="b-v" value="0.6" step="0.05" min="0.05" max="0.99" oninput="document.getElementById('b-v-sl').value=this.value;document.getElementById('disp-bv').textContent=parseFloat(this.value).toFixed(2);drawBox()">
+        <span class="ctrl-hint">units of c</span>
+      </div>
+      <div class="ctrl-block" style="min-width:160px;">
+        <label>Perturbation δn</label>
+        <div class="slider-row"><input type="range" id="b-dn-sl" min="-9" max="-1" step="0.1" value="-6" oninput="document.getElementById('b-dn').value=Math.pow(10,parseFloat(this.value)).toExponential(1);document.getElementById('disp-bdn').textContent='1e'+Math.round(this.value);drawBox()"><span class="ctrl-val" id="disp-bdn">1e-6</span></div>
+        <input type="number" id="b-dn" value="0.000001" step="0.000001" min="1e-9" max="0.49" oninput="drawBox()">
+        <span class="ctrl-hint">δn amplitude</span>
+      </div>
+      <div class="ctrl-block" style="min-width:140px;">
+        <label>Cell length Δx</label>
+        <div class="slider-row"><input type="range" id="b-dx-sl" min="0.001" max="2" step="0.01" value="0.05" oninput="document.getElementById('b-dx').value=this.value;document.getElementById('disp-bdx').textContent=parseFloat(this.value).toFixed(3);drawBox()"><span class="ctrl-val" id="disp-bdx">0.050</span></div>
+        <input type="number" id="b-dx" value="0.05" step="0.01" min="0.001" max="2" oninput="document.getElementById('b-dx-sl').value=this.value;document.getElementById('disp-bdx').textContent=parseFloat(this.value).toFixed(3);drawBox()">
+        <span class="ctrl-hint">c / ω_pe</span>
+      </div>
+      <div class="ctrl-block" style="min-width:140px;">
+        <label>Sim time T</label>
+        <div class="slider-row"><input type="range" id="b-T-sl" min="10" max="2000" step="10" value="150" oninput="document.getElementById('b-T').value=this.value;document.getElementById('disp-bT').textContent=this.value;drawBox()"><span class="ctrl-val" id="disp-bT">150</span></div>
+        <input type="number" id="b-T" value="150" step="10" min="10" max="2000" oninput="document.getElementById('b-T-sl').value=this.value;document.getElementById('disp-bT').textContent=this.value;drawBox()">
+        <span class="ctrl-hint">1 / ω_pe</span>
+      </div>
+      <div class="ctrl-block" style="min-width:220px;">
+        <label>Scenario</label>
+        <select id="b-scenario" onchange="drawBox()">
+          <option value="rel-single">Eq.(19) — Relativistic Single-species</option>
+          <option value="non-rel-single">Eq.(18) — Non-relativistic Single-species</option>
+          <option value="rel-multi">Eq.(21) — Relativistic Multi-species</option>
+          <option value="non-rel-multi">Eq.(20) — Non-relativistic Multi-species</option>
+        </select>
+        <span class="ctrl-hint">changes physics shown</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="box-status"></div>
+
+  <div class="card" style="padding:10px;">
+    <svg id="main-svg" viewBox="0 0 1060 645" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;overflow:visible;">
+      <defs>
+        <pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M 8 0 L 0 0 0 8" fill="none" stroke="#1a2235" stroke-width="0.5"/></pattern>
+        <marker id="ab" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#7eb8f7"/></marker>
+        <marker id="ay" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f9c74f"/></marker>
+        <marker id="ag" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#80b918"/></marker>
+        <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f07167"/></marker>
+        <marker id="ayr" markerWidth="8" markerHeight="6" refX="1" refY="3" orient="auto"><polygon points="8 0,0 3,8 6" fill="#f9c74f"/></marker>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow2"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <rect width="1060" height="645" fill="#0a0e1a"/>
+      <rect width="1060" height="645" fill="url(#grid)"/>
+      <g id="box-dyn"></g>
+    </svg>
+  </div>
+  <div class="legend-grid" id="box-legend"></div>
+</div>
+
+<div class="sec-divider"></div>
+
+<!-- ══════════ SECTION 6 — PHASE SPACE (exact from two_stream.html) ══════════ -->
+<section id="phase-space" style="padding:56px 20px;max-width:1300px;margin:0 auto;">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Phase Space Explorer</h2>
+    <span class="section-tag">Live particle trapping animation</span>
+  </div>
+
+  <div class="col2">
+    <div class="card">
+      <div class="card-label">Animation Controls</div>
+      <div class="ctrl-row">
+        <div class="ctrl-block" style="flex:1;">
+          <label>Beam Velocity v₀</label>
+          <div class="slider-row">
+            <input type="range" id="ps-v0" min="0.05" max="0.95" step="0.01" value="0.3" oninput="syncNum('psv0');initPhaseSpace()">
+            <span class="ctrl-val" id="disp-psv0">0.30</span>
+          </div>
+        </div>
+        <div class="ctrl-block" style="flex:1;">
+          <label>Wavenumber k</label>
+          <div class="slider-row">
+            <input type="range" id="ps-k" min="0.1" max="10" step="0.1" value="1.0" oninput="syncNum('psk');initPhaseSpace()">
+            <span class="ctrl-val" id="disp-psk">1.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-block" style="flex:1;">
+          <label>Perturbation δn</label>
+          <div class="slider-row">
+            <input type="range" id="ps-dn" min="0.001" max="0.3" step="0.001" value="0.05" oninput="syncNum('psdn');initPhaseSpace()">
+            <span class="ctrl-val" id="disp-psdn">0.050</span>
+          </div>
+        </div>
+        <div class="ctrl-block" style="flex:1;">
+          <label>Speed</label>
+          <div class="slider-row">
+            <input type="range" id="ps-speed" min="1" max="10" step="1" value="3" oninput="syncNum('psspeed')">
+            <span class="ctrl-val" id="disp-psspeed">3</span>
+          </div>
+        </div>
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-block">
+          <label>Display Mode</label>
+          <select id="ps-mode">
+            <option value="both">Both beams</option>
+            <option value="beam1">Beam 1 only (+v₀)</option>
+            <option value="beam2">Beam 2 only (−v₀)</option>
+          </select>
+        </div>
+        <div class="ctrl-block">
+          <label>Color by</label>
+          <select id="ps-color">
+            <option value="beam">Beam index</option>
+            <option value="energy">Kinetic energy</option>
+            <option value="phase">Wave phase</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-g btn-sm" id="ps-play-btn" onclick="togglePhaseAnim()">▶ Play</button>
+        <button class="btn btn-i btn-sm" onclick="resetPhaseAnim()">↺ Reset</button>
+        <button class="btn btn-a btn-sm" onclick="stepPhaseAnim()">▶| Step</button>
+      </div>
+      <!-- Time display -->
+      <div style="margin-top:14px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;padding:12px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:4px;">SIMULATION TIME</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:1.1rem;color:var(--phosphor);" id="ps-time-display">t = 0.00 ω⁻¹ₚ</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);margin-top:4px;" id="ps-phase-label">Phase: Initial two-stream configuration</div>
+      </div>
+    </div>
+
+    <!-- Phase space canvas -->
+    <div>
+      <div id="phase-canvas-container">
+        <canvas id="phase-canvas" height="400"></canvas>
+        <div class="phase-overlay-label">x-pₓ Phase Space</div>
+        <div class="phase-time-label" id="phase-time-overlay">t = 0</div>
+      </div>
+      <!-- E-field plot below -->
+      <div class="plot-wrap" style="margin-top:8px;">
+        <div id="efield-plot" style="width:100%;height:180px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Physics description -->
+  <div class="card" style="margin-top:16px;">
+    <div class="card-label">Phase Space Evolution Guide</div>
+    <div class="col3">
+      <div style="font-size:.88rem;color:#7a9ab0;line-height:1.7;"><strong style="color:var(--ice)">t ≈ 0 (Linear phase)</strong><br>Two sharp horizontal lines at px = ±v₀. Small density perturbation seeds the wave. Growth rate Im(γ) is constant — amplitude grows as e^(γt).</div>
+      <div style="font-size:.88rem;color:#7a9ab0;line-height:1.7;"><strong style="color:var(--amber)">t ~ 1/γ (Trapping)</strong><br>Particles begin to deviate from their beams. The wave potential wells capture particles — forming the characteristic cat's-eye vortex in phase space.</div>
+      <div style="font-size:.88rem;color:#7a9ab0;line-height:1.7;"><strong style="color:var(--phosphor)">t ≫ 1/γ (Saturation)</strong><br>Fully formed vortices fill phase space. Growth saturates. Beam energy has transferred to wave electrostatic energy and ultimately to particle heating.</div>
+    </div>
+  </div>
+</section>
+
+<div class="sec-divider"></div>
+
+<!-- ══════════ SECTION 7 — PLAYGROUND ══════════ -->
+<div class="sec" id="playground">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h2 class="section-title">Parameter Playground</h2>
+    <span class="section-tag">Save · Compare · Overlay</span>
+  </div>
+  <div class="col2">
+    <div class="card">
+      <div class="card-label">Saved Runs</div>
+      <div class="exp-log" id="exp-log"><div style="color:var(--dim);text-align:center;padding:20px;">No runs saved yet. Use "Save Run" in Live Growth Lab.</div></div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-g btn-sm" onclick="overlayRuns()">Overlay All</button>
+        <button class="btn btn-p btn-sm" onclick="clearRuns()">Clear All</button>
+      </div>
+    </div>
+    <div class="card" style="padding:12px;">
+      <div class="card-label">Comparison Plot</div>
+      <div class="plot-wrap" style="margin-top:0;"><div id="playground-plot" style="width:100%;height:380px;"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec-divider"></div>
+
+<!-- ══════════ SECTION 8 — FAQ ══════════ -->
+<div class="sec" id="faq">
+  <div class="section-header"><span class="section-num">08</span><h2 class="section-title">FAQ + Physical Intuition</h2></div>
+  <div id="faq-list">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Why does the instability happen at all? <span class="arrow">▼</span></div><div class="faq-a">Two beams create a <strong>free energy reservoir</strong>. When wave phase velocity ω/k ≈ v₀, particles and waves exchange energy resonantly. <em>Slow particles get accelerated; faster ones decelerate</em> — net energy flows from beams to wave amplitude, driving exponential growth.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Why is there a k_max (peak growth wavenumber)? <span class="arrow">▼</span></div><div class="faq-a"><strong>Low k</strong>: resonance far from plasma frequency → weak coupling. <strong>High k</strong>: 2v₀²k² term dominates bracket → bracket becomes positive → real ω → <em>stable oscillation, no growth</em>. Peak growth at optimal k_max where resonance coupling is strongest before stabilization. This peak shifts to lower k as v₀ increases.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How does relativity suppress growth? <span class="arrow">▼</span></div><div class="faq-a">The <strong>Lorentz factor γ₀³</strong> appears in the denominator of ωₚ² terms. At high v₀, γ₀→large, so effective plasma frequency ωₚ/γ₀^(3/2) → small. <em>At v₀→c: γ₀→∞, growth rate→0.</em> Relativistic inertia stabilizes the beam.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What are the "cat's eyes" in phase space? <span class="arrow">▼</span></div><div class="faq-a">When wave amplitude is large, particles <strong>trapped</strong> in potential wells execute closed orbits in (x, pₓ) — these look like <em>elliptical cat's eyes</em>. Trapping width Δpₓ ~ √(eE/k). When trapping occurs, linear theory fails and growth saturates.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Multi-species vs single-species — what changes? <span class="arrow">▼</span></div><div class="faq-a">Single-species: ions are frozen (infinite mass). Multi-species: mobile ions add an extra ωₚ² term, effectively <strong>doubling the ωₚ coefficient</strong> in the dispersion. This slightly increases growth rates and shifts k cutoffs. Ion dynamics become important at late times — beam filamentation and ion-acoustic coupling.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What does the "bracket" condition mean? <span class="arrow">▼</span></div><div class="faq-a">γ = √{½·bracket}. <strong>bracket &lt; 0</strong> → √(negative) → imaginary ω → Im(ω)=γ&gt;0 → <em>exponential growth</em>. <strong>bracket &gt; 0</strong> → real ω → stable oscillation. The k_cutoff is exactly where bracket = 0.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How do SMILEI parameters map to this theory? <span class="arrow">▼</span></div><div class="faq-a"><strong>grid_length</strong> = 2π/k (exactly one wavelength, xnumber=1 ✓)<br><strong>cell_length</strong> = Δx ≪ λ_Debye (typically 0.01–0.05)<br><strong>timestep</strong> = 0.0095 (CFL: Δt &lt; Δx/c)<br><strong>solve_poisson = True</strong>: critical — without this Ex=0 at t=0, instability never seeds<br><strong>Simulate to T</strong> ~ 5/γ to capture linear + nonlinear phases</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Two-stream vs Weibel instability? <span class="arrow">▼</span></div><div class="faq-a">Two-stream drives <strong>electrostatic</strong> (longitudinal) waves — Ex grows, from charge bunching. <em>Weibel instability</em> is <strong>electromagnetic</strong> (transverse) — grows from momentum anisotropy, generating magnetic filaments. Weibel dominates in oblique geometries or high transverse temperature. Both can coexist and thermalize beams.</div></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 08 — MMS LIVE OBSERVATORY
+════════════════════════════════════════════════════════════════ -->
+<div class="obs-divider"></div>
+
+<div class="obs-section" id="mms-observatory">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h2 class="section-title">MMS Live Observatory</h2>
+    <span class="section-tag">NASA MMS-1 · Real plasma data · Auto-updates every 6h</span>
+  </div>
+
+  <!-- Timestamp + status -->
+  <div id="obs-timestamp" class="timestamp-badge">
+    <span class="live-dot"></span>
+    <span id="obs-fetch-time">Loading...</span>
+    <span style="color:var(--muted);">|</span>
+    <span id="obs-data-window" style="color:var(--amber);">—</span>
+  </div>
+
+  <!-- TSI Status Banner -->
+  <div class="detect-banner db-quiet" id="tsi-banner">
+    <div class="db-icon" id="tsi-icon">⏳</div>
+    <div class="db-content">
+      <h3 id="tsi-status-title">Waiting for data...</h3>
+      <p id="tsi-status-body">Run the GitHub Actions workflow to populate with real MMS data.</p>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid-lg" id="obs-kpis"></div>
+
+  <!-- Instrument status -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;" id="inst-status"></div>
+
+  <!-- Parameter table -->
+  <div class="col2">
+    <div class="card">
+      <div class="card-label">Measured Plasma Parameters</div>
+      <p class="card-sub" style="font-family:'Exo 2',sans-serif;font-size:.85rem;color:var(--muted);margin-bottom:12px;">
+        All quantities derived directly from MMS L2 calibrated data for the time window shown.
+        Debye length λ_D = v_th / (√2 × ω_pe). Plasma beta β = nkT / (B²/2μ₀).
+      </p>
+      <table class="param-table" id="param-table">
+        <tr><th>Parameter</th><th>Value</th><th>Significance for TSI</th></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-label">Instability Detection Summary</div>
+      <div class="pill-row" id="obs-pills" style="gap:10px;"></div>
+      <div style="margin-top:16px;" id="obs-notes"></div>
+    </div>
+  </div>
+
+  <!-- B field plot -->
+  <div class="card" style="margin-top:14px;">
+    <div class="card-label">Magnetic Field |B| — Time Series (FGM, 8 sps)</div>
+    <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:10px;line-height:1.65;">
+      B magnitude in nT. Fluctuations δB around the mean represent turbulent
+      magnetic field variations. The spectral index α is fitted from the power
+      spectral density in the inertial range 0.01–2 Hz. Kolmogorov predicts α = −5/3;
+      Iroshnikov-Kraichnan predicts α = −3/2.
+    </p>
+    <div id="obs-b-plot" style="width:100%;height:480px;"></div>
+  </div>
+
+  <div class="col2" style="margin-top:14px;">
+    <div class="card">
+      <div class="card-label">B Field Components Bx, By, Bz (GSE)</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.85rem;color:var(--muted);margin-bottom:8px;">
+        Field direction tracks MMS-1 orbit through different magnetospheric regions.
+        Rapid component rotations indicate boundary crossings or reconnection geometry.
+      </p>
+      <div id="obs-bxyz-plot" style="width:100%;height:380px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Magnetic Power Spectrum E(f) — B PSD</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.85rem;color:var(--muted);margin-bottom:8px;">
+        Log-log PSD from Hanning-windowed FFT of |B|. Dashed reference slopes:
+        Kolmogorov −5/3 (amber) and Iroshnikov-Kraichnan −3/2 (purple).
+        Steeper roll-off indicates enhanced kinetic-scale dissipation.
+      </p>
+      <div id="obs-bpsd-plot" style="width:100%;height:380px;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 09 — THEORY VALIDATION
+════════════════════════════════════════════════════════════════ -->
+<div class="obs-section" id="theory-validation">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <h2 class="section-title">Theory Validation Against MMS Data</h2>
+    <span class="section-tag">Equations 18–21 vs observed plasma conditions</span>
+  </div>
+
+  <div class="insights-panel" style="margin-bottom:20px;" id="theory-insight">
+    <div class="insight-title">⚡ Theory vs Observation Status</div>
+    <span id="theory-insight-text">Loading theory validation...</span>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-label">Input Parameters for Theory (from MMS)</div>
+    <p style="font-family:'Exo 2',sans-serif;font-size:.9rem;color:var(--muted);margin-bottom:12px;line-height:1.7;">
+      The measured electron bulk speed V_e is used as the beam velocity v₀ = V_e/c.
+      The resonant wavenumber is k_res = ω_pe/v₀ (wave travels at beam speed).
+      Growth rates are then computed from Equations 18–21 and compared to
+      what the observations suggest.
+    </p>
+    <div class="kpi-grid" id="theory-input-kpis"></div>
+  </div>
+
+  <!-- Theory curves grid -->
+  <div class="col2" style="gap:16px;" id="theory-curves-grid"></div>
+
+  <!-- Overlay of all 4 equations -->
+  <div class="card" style="margin-top:14px;">
+    <div class="card-label">All Four Equations — Growth Rate γ(k) at Measured v₀</div>
+    <p style="font-family:'Exo 2',sans-serif;font-size:.9rem;color:var(--muted);margin-bottom:10px;line-height:1.7;">
+      Growth rate predictions from Equations 18–21 using the measured electron beam
+      velocity as v₀. The vertical dashed line marks the resonant wavenumber k_res = ω_pe/v₀.
+      If γ_max > 0, the instability is predicted to be active under current conditions.
+    </p>
+    <div id="theory-overlay-plot" style="width:100%;height:500px;"></div>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 10 — ELECTRON HOLES
+════════════════════════════════════════════════════════════════ -->
+<div class="obs-section" id="electron-holes">
+  <div class="section-header">
+    <span class="section-num">10</span>
+    <h2 class="section-title">Electron Holes — TSI Saturation Evidence</h2>
+    <span class="section-tag">EDP bipolar E∥ pulses · nonlinear phase products</span>
+  </div>
+
+  <div class="insights-panel" style="margin-bottom:20px;">
+    <div class="insight-title">📖 Why electron holes prove TSI happened</div>
+    When the two-stream instability grows, Langmuir waves amplify exponentially.
+    Once their electric potential φ ~ T_e/e, they trap electrons in "potential
+    wells" that travel along the magnetic field at the beam speed.
+    These are <strong style="color:var(--amber)">electron phase-space holes</strong> —
+    localised regions of depleted electron density, positive potential,
+    and bipolar (positive-then-negative) parallel electric field.
+    <br><br>
+    MMS EDP resolves them because they pass the spacecraft in ~1–50 ms.
+    Detection criterion: a bipolar E∥ event where |E∥| > 3×median(|E∥|),
+    duration 0.1–500 ms, and the waveform crosses zero twice within the event.
+    Each detected hole is a fossil of a Langmuir wave that saturated —
+    direct proof that TSI reached its nonlinear phase.
+    <br><br>
+    <em style="color:var(--muted)">References: Bernstein et al. (1957) PRL;
+    Fox et al. (2012) PRL; Graham et al. (2016) GRL;
+    Steinvall et al. (2021) GRL — MMS observations</em>
+  </div>
+
+  <div class="formula-box" style="margin-bottom:16px;">
+    <div class="f-label">Detection algorithm — bipolar E∥ pulse identification</div>
+    Threshold:  |E∥| > 3 × median(|E∥|)  and  |E∥| > 0.5 mV/m  (avoids noise floor)<br>
+    Duration:   0.1 ms &lt; Δt &lt; 500 ms  (EDP at 32 sps → resolves &gt; 31 ms)<br>
+    Shape:      waveform crosses zero before and after peak (bipolar signature)<br>
+    Speed:      v_hole ≈ v_beam (measured ≈ 100–1000 km/s from multi-spacecraft timing)<br>
+    Debye size: L_hole / λ_D typically 3–20 (sub-Debye to several Debye lengths)
+  </div>
+
+  <div id="holes-banner" class="detect-banner db-quiet">
+    <div class="db-icon" id="holes-icon">🔍</div>
+    <div class="db-content">
+      <h3 id="holes-title">Awaiting data...</h3>
+      <p id="holes-body">—</p>
+    </div>
+  </div>
+
+  <div class="kpi-grid-lg" id="holes-kpis"></div>
+
+  <div class="col2" style="margin-top:14px;">
+    <div class="card">
+      <div class="card-label">Parallel Electric Field E∥ Time Series (EDP, 32 sps)</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:8px;line-height:1.65;">
+        Ez component (proxy for E∥). Bipolar pulse pairs — sharp positive spike
+        immediately followed by negative spike — are the electron hole signature.
+        The amber dashed lines mark the ±detection threshold.
+      </p>
+      <div id="holes-epar-plot" style="width:100%;height:460px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total |E| Field Magnitude (EDP)</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:8px;line-height:1.65;">
+        Full electric field magnitude. Spikes coinciding with bipolar E∥ events
+        confirm electron hole passage. The mean level tracks background
+        wave activity (Langmuir, whistler, ion acoustic waves).
+      </p>
+      <div id="holes-emag-plot" style="width:100%;height:460px;"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-label">Detected Bipolar Events — Event Table</div>
+    <div id="holes-event-table"></div>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 11 — BEAM & df/dv ANALYSIS
+════════════════════════════════════════════════════════════════ -->
+<div class="obs-section" id="beam-analysis">
+  <div class="section-header">
+    <span class="section-num">11</span>
+    <h2 class="section-title">Electron Beam &amp; VDF Slope Analysis</h2>
+    <span class="section-tag">FPI-DES moments · bump-on-tail test · 2025 debate</span>
+  </div>
+
+  <div class="insights-panel" style="margin-bottom:20px;">
+    <div class="insight-title">📖 The bump-on-tail condition and the 2025 debate</div>
+    Classical TSI theory (our Eq.18–21) requires a <strong style="color:var(--amber)">positive
+    slope in the electron velocity distribution</strong> function at the wave phase velocity:
+    ∂f/∂v > 0 at v = v_phase = ω_pe/k. This is the "bump-on-tail" configuration —
+    a second population of faster electrons creates a local maximum in f(v).
+    <br><br>
+    However, a July 2025 paper (Jebaraj et al. 2025, A&amp;A) argues that many
+    in-situ observations are better explained by a <strong style="color:var(--ice)">truncated
+    distribution</strong> (the beam is cut off by time-of-flight dispersion, not by a
+    thermal bump). In this case, df/dv ≤ 0 everywhere but the sharp cutoff
+    still drives Langmuir waves via a different mechanism.
+    <br><br>
+    We estimate the bump-on-tail proxy as <strong style="color:var(--phosphor)">r = v_beam/v_thermal</strong>.
+    If r >> 1, a classical bump is expected. If r ≈ 1, only truncation.
+    From MMS FPI-DES: v_thermal = √(2 T_par / m_e) computed from measured T_par.
+    <br><br>
+    <em style="color:var(--muted)">References: Buneman (1958) PRL;
+    Jebaraj et al. (2025) A&amp;A — bump-on-tail vs truncation debate</em>
+  </div>
+
+  <div class="formula-box" style="margin-bottom:16px;">
+    <div class="f-label">Key formulae</div>
+    Thermal speed:      v_th = √(2 k_B T_par / m_e) = √(2 T_par[eV] / 511000) × c  [km/s]<br>
+    Beam-thermal ratio: r = V_e / v_th  →  bump-on-tail if r ≫ 1<br>
+    Resonance:          k_res = ω_pe / V_e  (beam resonance condition k·v₀ = ω_pe)<br>
+    Plasma frequency:   f_pe [Hz] = 8980 × √(n_e [cm⁻³])
+  </div>
+
+  <div id="beam-banner" class="detect-banner db-quiet">
+    <div class="db-icon">⚡</div>
+    <div class="db-content">
+      <h3 id="beam-title">Awaiting data...</h3>
+      <p id="beam-body">—</p>
+    </div>
+  </div>
+
+  <div class="kpi-grid-lg" id="beam-kpis"></div>
+
+  <div class="col2" style="margin-top:14px;">
+    <div class="card">
+      <div class="card-label">Electron Bulk Speed |V_e| vs Time (FPI-DES)</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:8px;line-height:1.65;">
+        3D bulk velocity magnitude from FPI-DES fast survey (~4.5 s cadence).
+        The pink dashed line is the 300 km/s beam detection threshold.
+        High speeds indicate directional electron streaming — the TSI driver.
+      </p>
+      <div id="beam-ve-plot" style="width:100%;height:460px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Electron Density n_e &amp; Plasma Frequency f_pe</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:8px;line-height:1.65;">
+        Left: electron number density (green). Right: computed plasma frequency
+        f_pe = 8980×√(n_e). Higher f_pe → faster Langmuir wave growth (γ ∝ ω_pe)
+        → quicker TSI development. Density variations track magnetospheric regions.
+      </p>
+      <div id="beam-ne-plot" style="width:100%;height:460px;"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-label">Resonance Condition Summary</div>
+    <table class="param-table" id="beam-resonance-table">
+      <tr><th>Quantity</th><th>Value</th><th>Interpretation</th></tr>
+    </table>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 12 — TSI → WEIBEL CHAIN
+════════════════════════════════════════════════════════════════ -->
+<div class="obs-section" id="tsi-weibel-chain">
+  <div class="section-header">
+    <span class="section-num">12</span>
+    <h2 class="section-title">TSI → Weibel Energy Chain</h2>
+    <span class="section-tag">Cross-correlation analysis · T⊥/T∥ · causal test</span>
+  </div>
+
+  <div class="insights-panel" style="margin-bottom:20px;">
+    <div class="insight-title">📖 The TSI→Weibel causal chain (Innocenti et al. 2017)</div>
+    PIC simulations predict a direct energy cascade:
+    <strong style="color:var(--amber)">electron beam</strong> → two-stream instability
+    → Langmuir waves grow → waves scatter beam electrons into the
+    <strong style="color:var(--ice)">perpendicular direction</strong>
+    → builds T_perp > T_par → drives
+    <strong style="color:var(--phosphor)">Weibel-like electromagnetic waves</strong>
+    that generate magnetic fluctuations from a seed field of essentially zero.
+    <br><br>
+    Observational signature: a <strong style="color:var(--amber)">spike in V_e</strong>
+    (beam active → TSI growing) should be followed — with a short lag — by a
+    <strong style="color:var(--ice)">rise in T_perp/T_par</strong>
+    (perpendicular heating → Weibel drive building up).
+    We test this with <strong style="color:var(--phosphor)">cross-correlation analysis</strong>:
+    C(τ) = ⟨V_e(t) × [T⊥/T∥](t+τ)⟩.
+    A positive peak at τ > 0 confirms the causal ordering.
+    <br><br>
+    <strong style="color:var(--pink)">This chain has not been directly confirmed observationally.
+    Confirming it with MMS data would be a publishable result.</strong>
+    <br><br>
+    <em style="color:var(--muted)">References: Innocenti et al. (2017) ApJL;
+    Weibel (1959) PRL; MMS FPI-DES measurements</em>
+  </div>
+
+  <div class="formula-box" style="margin-bottom:16px;">
+    <div class="f-label">Cross-correlation test and Weibel threshold</div>
+    Cross-correlation:   C(τ) = ⟨V_e(t) × [T⊥/T∥](t+τ)⟩ / (σ_Ve × σ_T)<br>
+    Chain detected if:   C(τ) > 0.2  AND  peak_lag τ > 0  AND  beam_flag = True  AND  A > 0.05<br>
+    Weibel parameter:    A = T_perp/T_par − 1  (must be &gt; 0 for instability)<br>
+    Weibel growth rate:  γ_W / ω_p = √(A/(1+A)) × v_th_perp / c<br>
+    Firehose threshold:  A &lt; −1/β_∥  (opposite instability if T_par ≫ T_perp)
+  </div>
+
+  <div id="chain-banner" class="detect-banner db-quiet">
+    <div class="db-icon">🔗</div>
+    <div class="db-content">
+      <h3 id="chain-title">Awaiting data...</h3>
+      <p id="chain-body">—</p>
+    </div>
+  </div>
+
+  <div class="kpi-grid-lg" id="chain-kpis"></div>
+
+  <div class="col2" style="margin-top:14px;">
+    <div class="card">
+      <div class="card-label">T_perp and T_par — Electron Temperatures (FPI-DES)</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:8px;line-height:1.65;">
+        Blue = T_par (parallel to B). Amber = T_perp (perpendicular to B).
+        When T_perp persistently exceeds T_par, the Weibel instability is driven.
+        The dashed line marks T_perp = T_par (stability boundary A = 0).
+      </p>
+      <div id="chain-t-plot" style="width:100%;height:460px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">T_perp/T_par Ratio — Anisotropy A = Ratio − 1</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:8px;line-height:1.65;">
+        Purple line = ratio T_perp/T_par. Red dashed = stability boundary (ratio = 1).
+        Sustained values above 1.0 indicate active Weibel drive.
+        Values below 1.0 indicate firehose instability conditions.
+      </p>
+      <div id="chain-ratio-plot" style="width:100%;height:460px;"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-label">Cross-Correlation C(τ) between V_e and T⊥/T∥ — Causal Chain Test</div>
+    <p style="font-family:'Exo 2',sans-serif;font-size:.9rem;color:var(--muted);margin-bottom:10px;line-height:1.7;">
+      A positive peak at positive lag τ means T_perp/T_par rises AFTER the V_e spike —
+      consistent with the TSI driving Weibel. A peak at τ = 0 is coincident (no causal order).
+      A peak at τ < 0 would suggest the anisotropy preceded the beam (reverse causality).
+      Amber dashed line = detection threshold C = 0.2.
+    </p>
+    <div id="chain-xcorr-plot" style="width:100%;height:420px;"></div>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 13 — LANGMUIR WAVES
+════════════════════════════════════════════════════════════════ -->
+<div class="obs-section" id="langmuir-section">
+  <div class="section-header">
+    <span class="section-num">13</span>
+    <h2 class="section-title">Langmuir Wave Proxy</h2>
+    <span class="section-tag">EDP electric field PSD · linear phase TSI product</span>
+  </div>
+
+  <div class="insights-panel" style="margin-bottom:20px;">
+    <div class="insight-title">📖 Langmuir waves — the first sign that TSI is active</div>
+    In the <strong style="color:var(--amber)">linear phase</strong> of TSI (before saturation
+    into electron holes), the instability drives <strong style="color:var(--ice)">Langmuir waves</strong> —
+    electrostatic plasma oscillations at exactly the plasma frequency f_pe.
+    These are the fastest-growing normal mode; their growth rate is given by our Eq.18–21.
+    <br><br>
+    We detect them as an <strong style="color:var(--phosphor)">enhancement in the
+    electric field power spectral density near f_pe</strong> compared to nearby frequencies.
+    Enhancement ratio R = PSD(0.8–1.2×f_pe) / PSD(0.5–0.7×f_pe) > 3 flags active Langmuir waves.
+    <br><br>
+    Note: f_pe in the magnetosphere is typically 1–100 kHz,
+    far above the EDP slow-survey Nyquist frequency (~16 Hz).
+    This proxy works best for very high-density plasmas (f_pe < 16 Hz)
+    or when EDP burst-mode data is available.
+    <br><br>
+    <em style="color:var(--muted)">References: Malaspina et al. (2014) GRL 41, 5204;
+    Kellogg et al. (2009) — Langmuir collapse; Jebaraj et al. (2025)</em>
+  </div>
+
+  <div id="langmuir-banner" class="detect-banner db-quiet">
+    <div class="db-icon">🌊</div>
+    <div class="db-content">
+      <h3 id="langmuir-title">Awaiting data...</h3>
+      <p id="langmuir-body">—</p>
+    </div>
+  </div>
+
+  <div class="kpi-grid-lg" id="langmuir-kpis"></div>
+
+  <div class="col2" style="margin-top:14px;">
+    <div class="card">
+      <div class="card-label">Electric Field PSD — Full Spectrum (EDP)</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:8px;line-height:1.65;">
+        Log-log PSD of |E| from Hanning-windowed FFT. Amber vertical line marks f_pe.
+        Enhanced power near f_pe indicates Langmuir wave activity driven by the beam.
+      </p>
+      <div id="langmuir-psd-plot" style="width:100%;height:460px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">B-field Turbulence PSD with Kolmogorov References</div>
+      <p style="font-family:'Exo 2',sans-serif;font-size:.88rem;color:var(--muted);margin-bottom:8px;line-height:1.65;">
+        Magnetic PSD from FGM. Reference slopes: Kolmogorov −5/3 (amber dashes),
+        IK −3/2 (purple dashes). The measured spectral index α is shown.
+        TSI and Weibel activity can inject energy that steepens the spectrum.
+      </p>
+      <div id="langmuir-bpsd-plot" style="width:100%;height:460px;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 14 — 6-MONTH HISTORICAL RECORD
+════════════════════════════════════════════════════════════════ -->
+<div class="obs-section" id="history-6mo">
+  <div class="section-header">
+    <span class="section-num">14</span>
+    <h2 class="section-title">6-Month Historical Record</h2>
+    <span class="section-tag">One record per 6-hour window · rolling database</span>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-label">About the historical database</div>
+    <p style="font-family:'Exo 2',sans-serif;font-size:.92rem;line-height:1.8;color:#a0c4d8;">
+      Each time the GitHub Actions workflow runs (every 6 hours), one record is appended
+      to the history database. The database stores up to 720 records (~180 days = 6 months).
+      Older records are automatically removed to stay within GitHub's file size limits.
+      These plots reveal how plasma conditions at MMS-1's orbit evolve as it passes through
+      different magnetospheric regions — from the quiet plasmasphere to the turbulent
+      magnetosheath, through reconnection regions and flux transfer events.
+      <br><br>
+      Because MMS data has a ~90 day latency, the history covers a window that is
+      approximately 90–270 days ago from the current date.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;" id="hist-summary-pills"></div>
+  </div>
+
+  <!-- History charts -->
+  <div class="hist-chart-grid">
+    <div class="hist-card">
+      <h4>Magnetic Field Strength |B| over Time</h4>
+      <p class="hist-caption">Tracks MMS-1 orbital position through different field strength regions. Large values = inner magnetosphere or compression; low values = magnetotail or boundary layers.</p>
+      <div id="hist-b-plot" style="height:300px;"></div>
+    </div>
+    <div class="hist-card">
+      <h4>Turbulence Spectral Index α</h4>
+      <p class="hist-caption">Fitted slope of B PSD in the inertial range. Dashed: Kolmogorov −5/3 (amber), IK −3/2 (purple). Steeper values indicate enhanced dissipation, possibly from TSI/Weibel injection.</p>
+      <div id="hist-alpha-plot" style="height:300px;"></div>
+    </div>
+  </div>
+
+  <div class="hist-chart-grid">
+    <div class="hist-card">
+      <h4>Electron Bulk Speed V_e — Beam Activity Monitor</h4>
+      <p class="hist-caption">High Ve (&gt;300 km/s, above amber dashed line) indicates active electron beams and TSI-favorable conditions. Track beam occurrence frequency over months.</p>
+      <div id="hist-ve-plot" style="height:300px;"></div>
+    </div>
+    <div class="hist-card">
+      <h4>Temperature Anisotropy A = T⊥/T∥ − 1</h4>
+      <p class="hist-caption">Weibel drive parameter. Positive (above dashed line) = Weibel active. Negative = firehose possible. Track how often anisotropy builds after beam events.</p>
+      <div id="hist-aniso-plot" style="height:300px;"></div>
+    </div>
+  </div>
+
+  <div class="hist-chart-grid">
+    <div class="hist-card">
+      <h4>Electron Holes Per Window</h4>
+      <p class="hist-caption">Count of bipolar E∥ events per 6-hour window. High counts indicate active TSI saturation phase. Correlate with V_e spikes to test causality.</p>
+      <div id="hist-holes-plot" style="height:300px;"></div>
+    </div>
+    <div class="hist-card">
+      <h4>Plasma Frequency f_pe (kHz)</h4>
+      <p class="hist-caption">Tracks electron density variation. Higher f_pe → faster TSI growth rate. Changes track MMS-1 through density cavities, plasmapause, and magnetosheath.</p>
+      <div id="hist-fpe-plot" style="height:300px;"></div>
+    </div>
+  </div>
+
+  <!-- TSI Score timeline -->
+  <div class="hist-card" style="margin-top:0;">
+    <h4>TSI Activity Score (0–13) — 6-Month Timeline</h4>
+    <p class="hist-caption" style="margin-bottom:12px;">
+      Composite score combining: beam detection (+2), electron holes (+3 if &gt;5, +1 if any),
+      Langmuir active (+2), chain detected (+3), anisotropy A&gt;0.05 (+1), dfdv&gt;3 (+2).
+      ACTIVE ≥ 7 | PROBABLE 4–6 | POSSIBLE 2–3 | QUIET 0–1.
+    </p>
+    <div id="hist-score-plot" style="height:320px;"></div>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 15 — UNUSUAL EVENTS LOG
+════════════════════════════════════════════════════════════════ -->
+<div class="obs-section" id="events-log">
+  <div class="section-header">
+    <span class="section-num">15</span>
+    <h2 class="section-title">Unusual Events Log</h2>
+    <span class="section-tag">Automatically detected plasma anomalies with explanations</span>
+  </div>
+
+  <div class="insights-panel" style="margin-bottom:20px;">
+    <div class="insight-title">How events are classified</div>
+    The fetcher automatically detects 6 categories of unusual events in each 6-hour window:
+    <strong style="color:var(--pink)">HIGH_B_FIELD</strong> (B_max &gt; 3σ above mean, or &gt;500 nT),
+    <strong style="color:var(--amber)">ELECTRON_HOLE_BURST</strong> (≥10 bipolar events),
+    <strong style="color:var(--ice)">HIGH_TEMPERATURE_ANISOTROPY</strong> (A &gt; 0.3),
+    <strong style="color:var(--phosphor)">ELECTRON_BEAM_DETECTED</strong> (V_e &gt; 300 km/s),
+    <strong style="color:var(--purple)">TSI_WEIBEL_CHAIN</strong> (both conditions simultaneously active),
+    <strong style="color:var(--muted)">STEEP_TURBULENCE_SPECTRUM</strong> (α &lt; −2.5).
+    Each event includes measured values and a scientific explanation.
+  </div>
+
+  <div id="events-container">
+    <div class="no-data" style="text-align:center;padding:40px;color:var(--muted);font-family:'Share Tech Mono',monospace;">
+      No events logged yet. Events accumulate over time as the workflow runs.
+    </div>
+  </div>
+</div>
+
+<div class="obs-divider"></div>
+
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// PHYSICS ENGINE — exact switch-case from simulation-box.html
+// ═══════════════════════════════════════════════════════════════
+const SC = {
+  'non-rel-single':{name:'Non-relativistic Single-species',ref:'Eq.(18)',eq:'γ = √{ ½[2v₀²k² + ω²ₚ − √(8v₀²k²ω²ₚ + ω⁴ₚ)] }',relativistic:false,multi:false,color:'#ff9f1c'},
+  'rel-single':    {name:'Relativistic Single-species',    ref:'Eq.(19)',eq:'γ = √{ ½[2v₀²k² + ω²ₚ/γ₀³ − √(8v₀²k²ω²ₚ/γ₀³ + ω⁴ₚ/γ₀⁶)] }',relativistic:true, multi:false,color:'#00d4ff'},
+  'non-rel-multi': {name:'Non-relativistic Multi-species', ref:'Eq.(20)',eq:'γ = √{ ½[2v₀²k² + 2ω²ₚ − √(16v₀²k²ω²ₚ + 4ω⁴ₚ)] }',relativistic:false,multi:true, color:'#39ff14'},
+  'rel-multi':     {name:'Relativistic Multi-species',     ref:'Eq.(21)',eq:'γ = √{ ½[2v₀²k² + 2ω²ₚ/γ₀³ − √(16v₀²k²ω²ₚ/γ₀³ + 4ω⁴ₚ/γ₀⁶)] }',relativistic:true, multi:true, color:'#b06cff'},
+};
+
+function lorentzFactor(v0){const v2=v0*v0;if(v2>=1)return null;return 1.0/Math.sqrt(1-v2);}
+
+function computeGamma(type,v0,wp,k){
+  // Exact equations from simulation-box.html
+  const gamma0=lorentzFactor(v0);
+  if(gamma0===null&&SC[type].relativistic) return{error:true};
+  const v2=v0*v0,k2=k*k,wp2=wp*wp,wp4=wp2*wp2;
+  let term1,innerSqrt,term2,insideBracket;
+  switch(type){
+    case 'non-rel-single':
+      term1=2*v2*k2+wp2;innerSqrt=8*v2*k2*wp2+wp4;term2=Math.sqrt(innerSqrt);insideBracket=term1-term2;break;
+    case 'rel-single':{
+      const g3=Math.pow(gamma0,3),g6=Math.pow(gamma0,6);
+      term1=2*v2*k2+wp2/g3;innerSqrt=8*v2*k2*wp2/g3+wp4/g6;term2=Math.sqrt(innerSqrt);insideBracket=term1-term2;break;}
+    case 'non-rel-multi':
+      term1=2*v2*k2+2*wp2;innerSqrt=16*v2*k2*wp2+4*wp4;term2=Math.sqrt(innerSqrt);insideBracket=term1-term2;break;
+    case 'rel-multi':{
+      const g3m=Math.pow(gamma0,3),g6m=Math.pow(gamma0,6);
+      term1=2*v2*k2+2*wp2/g3m;innerSqrt=16*v2*k2*wp2/g3m+4*wp4/g6m;term2=Math.sqrt(innerSqrt);insideBracket=term1-term2;break;}
+  }
+  const isComplex=insideBracket<0;
+  const magnitude=Math.sqrt(0.5*Math.abs(insideBracket));
+  return{gamma:magnitude,isComplex,growthRate:isComplex?magnitude:0,oscFreq:!isComplex?magnitude:0,insideBracket,term1,innerSqrt,term2,gamma0};
+}
+
+function kCutoff(type,v0,wp){
+  const N=8000,kMax=8;
+  for(let i=1;i<=N;i++){const k=i*kMax/N;const r=computeGamma(type,v0,wp,k);if(r.error)return null;if(!r.isComplex)return(i-0.5)*kMax/N;}
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIM DATA
+// ═══════════════════════════════════════════════════════════════
+const SIM_DATA={
+  0.1:{k:[1,2,3,4,5,6,7,8],analytical:[0.098057,0.185624,0.26406,0.308194,0.340625,0.353392,0.345042,0.311339],simulation:[0.102928,0.184323,0.251347,0.308861,0.336450,0.349030,0.340197,0.304704]},
+  0.2:{k:[1,2,3,4],analytical:[0.185624,0.308194,0.353392,0.311339],simulation:[0.183228,0.301217,0.340758,0.287740]},
+  0.3:{k:[0.5,1,1.5,2,2.5,3],analytical:[0.142765,0.251046,0.3135,0.328409,0.287756,0.131996],simulation:[0.147076,0.253860,0.319085,0.326907,0.316059,0.140311]},
+  0.4:{k:[0.5,1,1.5,2],analytical:[0.18184,0.288416,0.305298,0.19944],simulation:[0.198436,0.286887,0.288268,0.191801]},
+  0.5:{k:[0.5,0.8,1,1.5],analytical:[0.211642,0.273835,0.284883,0.164827],simulation:[0.215320,0.282742,0.283288,0.170703]},
+  0.6:{k:[0.1,0.2,0.4,0.6,0.8,0.9,1.0],analytical:[0.059173,0.113754,0.198171,0.244231,0.250317,0.236295,0.207172],simulation:[0.060451,0.125715,0.207068,0.245544,0.249821,0.236919,0.207811]},
+  0.7:{k:[0.1,0.2,0.3,0.4,0.5,0.6,0.8],analytical:[0.068819,0.126881,0.171884,0.199864,0.212705,0.208709,0.125356],simulation:[0.104750,0.127531,0.174471,0.200892,0.211745,0.204891,0.126566]},
+  0.8:{k:[0.1,0.2,0.3,0.4,0.5],analytical:[0.075630,0.130928,0.159163,0.161349,0.127378],simulation:[0.095477,0.130685,0.158636,0.161368,0.128896]},
+  0.9:{k:[0.1,0.15,0.2,0.25,0.3],analytical:[0.075996,0.095739,0.101694,0.092006,0.055886],simulation:[0.075454,0.095207,0.102666,0.092090,0.057306]},
+  0.95:{k:[0.1,0.12,0.14,0.16,0.18],analytical:[0.060856,0.061372,0.057147,0.046390,0.019848],simulation:[0.063561,0.061834,0.057381,0.046594,0.019692]}
+};
+
+// ═══════════════════════════════════════════════════════════════
+// UI STATE
+// ═══════════════════════════════════════════════════════════════
+let currentSC='non-rel-single',savedRuns=[],calcData=null,cmpData=null,gcPlotData=null,expertMode=false;
+
+// ═══════════════════════════════════════════════════════════════
+// SLIDER ↔ NUMBER SYNC (from two_stream.html)
+// ═══════════════════════════════════════════════════════════════
+const sliderMap={
+  v0:    {sl:'sl-v0',  num:'num-v0',  disp:'disp-v0',  fmt:v=>v.toFixed(2)},
+  wp:    {sl:'sl-wp',  num:'num-wp',  disp:'disp-wp',  fmt:v=>v.toFixed(2)},
+  k:     {sl:'sl-k',   num:'num-k',   disp:'disp-k',   fmt:v=>v.toFixed(2)},
+  kmax:  {sl:'sl-kmax',num:'num-kmax',disp:'disp-kmax',fmt:v=>v.toFixed(1)},
+  cmpv0: {sl:'cmp-v0-sl',num:'cmp-v0',disp:'disp-cmpv0',fmt:v=>v.toFixed(2)},
+  psv0:  {sl:'ps-v0',  num:null,      disp:'disp-psv0', fmt:v=>v.toFixed(2)},
+  psk:   {sl:'ps-k',   num:null,      disp:'disp-psk',  fmt:v=>v.toFixed(2)},
+  psdn:  {sl:'ps-dn',  num:null,      disp:'disp-psdn', fmt:v=>v.toFixed(3)},
+  psspeed:{sl:'ps-speed',num:null,    disp:'disp-psspeed',fmt:v=>v.toFixed(0)},
+};
+function syncNum(key){const m=sliderMap[key];const sl=document.getElementById(m.sl);if(!sl)return;const v=parseFloat(sl.value);if(m.num){const n=document.getElementById(m.num);if(n)n.value=v;}if(m.disp){const d=document.getElementById(m.disp);if(d)d.textContent=m.fmt(v);}}
+function syncSlider(key){const m=sliderMap[key];const num=document.getElementById(m.num);if(!num)return;const v=parseFloat(num.value);const sl=document.getElementById(m.sl);if(sl)sl.value=v;if(m.disp){const d=document.getElementById(m.disp);if(d)d.textContent=m.fmt(v);}}
+function getVal(numId,slId){const n=document.getElementById(numId);if(n)return parseFloat(n.value)||0;const s=document.getElementById(slId);return s?parseFloat(s.value)||0:0;}
+function getV0(){return getVal('num-v0','sl-v0');}
+function getWp(){return getVal('num-wp','sl-wp');}
+function getK() {return getVal('num-k','sl-k');}
+function getKmax(){return getVal('num-kmax','sl-kmax');}
+
+// ═══════════════════════════════════════════════════════════════
+// GROWTH CALC SECTION (exact from growth_calc.html, dark-adapted)
+// ═══════════════════════════════════════════════════════════════
+const gcFormulas={
+  'non-rel-single':{name:'Non-relativistic Single-species',equation:'γ = √{½[2v₀²k² + ω²ₚ - √(8v₀²k²ω²ₚ + ω⁴ₚ)]}',defaults:{v0:0.3,wp:1.0,k:1.0},relativistic:false},
+  'rel-single':    {name:'Relativistic Single-species',    equation:'γ = √{½[2v₀²k² + ω²ₚ/γ₀³ - √(8v₀²k²ω²ₚ/γ₀³ + ω⁴ₚ/γ₀⁶)]}',defaults:{v0:0.8,wp:1.0,k:1.0},relativistic:true},
+  'non-rel-multi': {name:'Non-relativistic Multi-species', equation:'γ = √{½[2v₀²k² + 2ω²ₚ - √(16v₀²k²ω²ₚ + 4ω⁴ₚ)]}',defaults:{v0:0.3,wp:1.0,k:1.0},relativistic:false},
+  'rel-multi':     {name:'Relativistic Multi-species',     equation:'γ = √{½[2v₀²k² + 2ω²ₚ/γ₀³ - √(16v₀²k²ω²ₚ/γ₀³ + 4ω⁴ₚ/γ₀⁶)]}',defaults:{v0:0.8,wp:1.0,k:1.0},relativistic:true},
+};
+
+function gcCalcLorentz(v0){const v2=v0*v0;if(v2>=1)return null;return 1.0/Math.sqrt(1-v2);}
+
+function gcCalculateGamma(type,v0,wp,k){
+  // Exact from growth_calc.html
+  const gamma0=gcCalcLorentz(v0);
+  if(gamma0===null&&gcFormulas[type].relativistic)return{gamma:NaN,isComplex:false,error:true};
+  let term1,innerSqrt,term2,insideBracket;
+  const v0s=v0*v0,ks=k*k,wps=wp*wp,wpf=wps*wps;
+  switch(type){
+    case 'non-rel-single':
+      term1=2*v0s*ks+wps;innerSqrt=8*v0s*ks*wps+wpf;term2=Math.sqrt(innerSqrt);insideBracket=term1-term2;break;
+    case 'rel-single':{
+      const g3c=Math.pow(gamma0,3),g6c=Math.pow(gamma0,6);
+      term1=2*v0s*ks+wps/g3c;innerSqrt=8*v0s*ks*wps/g3c+wpf/g6c;term2=Math.sqrt(innerSqrt);insideBracket=term1-term2;break;}
+    case 'non-rel-multi':
+      term1=2*v0s*ks+2*wps;innerSqrt=16*v0s*ks*wps+4*wpf;term2=Math.sqrt(innerSqrt);insideBracket=term1-term2;break;
+    case 'rel-multi':{
+      const g3m=Math.pow(gamma0,3),g6m=Math.pow(gamma0,6);
+      term1=2*v0s*ks+2*wps/g3m;innerSqrt=16*v0s*ks*wps/g3m+4*wpf/g6m;term2=Math.sqrt(innerSqrt);insideBracket=term1-term2;break;}
+  }
+  const isComplex=insideBracket<0;
+  const gamma=isComplex?Math.sqrt(0.5*Math.abs(insideBracket)):Math.sqrt(0.5*insideBracket);
+  return{gamma,isComplex,term1,innerSqrt,term2,insideBracket,gamma0};
+}
+
+function gcValidate(v0,wp,k){
+  const msgs=[];
+  if(v0<0)msgs.push('v₀ must be non-negative');
+  if(v0>=1)msgs.push('v₀ must be less than 1 (c=1)');
+  if(wp<=0)msgs.push('ωₚ must be positive');
+  if(k<0)msgs.push('k must be non-negative');
+  const vd=document.getElementById('gc-validationMessages');
+  if(msgs.length){vd.classList.remove('hidden');document.getElementById('gc-validationText').innerHTML=msgs.join('<br>');return false;}
+  vd.classList.add('hidden');return true;
+}
+
+function gcSyncNum(key){
+  const slMap={'v0':['gc-sl-v0','gc-v0','gc-disp-v0',v=>v.toFixed(2)],'wp':['gc-sl-wp','gc-wp','gc-disp-wp',v=>v.toFixed(2)],'k':['gc-sl-k','gc-k','gc-disp-k',v=>v.toFixed(2)]};
+  const [slId,numId,dispId,fmt]=slMap[key];
+  const sl=document.getElementById(slId);const v=parseFloat(sl.value);
+  document.getElementById(numId).value=v;
+  document.getElementById(dispId).textContent=fmt(v);
+  gcUpdateLorentz();
+}
+function gcSyncSlider(key){
+  const slMap={'v0':['gc-sl-v0','gc-v0','gc-disp-v0',v=>v.toFixed(2)],'wp':['gc-sl-wp','gc-wp','gc-disp-wp',v=>v.toFixed(2)],'k':['gc-sl-k','gc-k','gc-disp-k',v=>v.toFixed(2)]};
+  const [slId,numId,dispId,fmt]=slMap[key];
+  const num=document.getElementById(numId);const v=parseFloat(num.value);
+  document.getElementById(slId).value=v;
+  document.getElementById(dispId).textContent=fmt(v);
+}
+
+function gcUpdateLorentz(){
+  const type=document.getElementById('gc-formulaType').value;
+  const v0=parseFloat(document.getElementById('gc-v0').value)||0;
+  const ld=document.getElementById('gc-lorentzDisplay');
+  if(gcFormulas[type].relativistic&&v0>0&&v0<1){
+    const g0=gcCalcLorentz(v0);
+    ld.classList.remove('hidden');
+    if(g0===null){document.getElementById('gc-lorentzValue').textContent='undefined (v≥c)';return;}
+    document.getElementById('gc-lorentzValue').textContent=`γ₀ = ${g0.toFixed(6)}   γ₀³ = ${Math.pow(g0,3).toFixed(6)}   γ₀⁶ = ${Math.pow(g0,6).toFixed(6)}`;
+  }else ld.classList.add('hidden');
+}
+
+function gcUpdateFormula(){
+  const type=document.getElementById('gc-formulaType').value;
+  const f=gcFormulas[type];
+  document.getElementById('gc-formulaDisplay').innerHTML=`<div class="gc-formula-name">${f.name}</div><div class="gc-formula-eq">${f.equation}</div>`;
+  document.getElementById('gc-v0').value=f.defaults.v0;document.getElementById('gc-sl-v0').value=f.defaults.v0;document.getElementById('gc-disp-v0').textContent=f.defaults.v0.toFixed(2);
+  document.getElementById('gc-wp').value=f.defaults.wp;document.getElementById('gc-sl-wp').value=f.defaults.wp;document.getElementById('gc-disp-wp').textContent=f.defaults.wp.toFixed(2);
+  document.getElementById('gc-k').value=f.defaults.k; document.getElementById('gc-sl-k').value=f.defaults.k; document.getElementById('gc-disp-k').textContent=f.defaults.k.toFixed(2);
+  gcUpdateLorentz();
+  document.getElementById('gc-singleResult').classList.add('hidden');
+  document.getElementById('gc-plotContainer').classList.add('hidden');
+  document.getElementById('gc-exportBtn').classList.add('hidden');
+  document.getElementById('gc-validationMessages').classList.add('hidden');
+}
+
+function gcCalculateSingle(){
+  const type=document.getElementById('gc-formulaType').value;
+  const v0=parseFloat(document.getElementById('gc-v0').value)||0;
+  const wp=parseFloat(document.getElementById('gc-wp').value)||0;
+  const k=parseFloat(document.getElementById('gc-k').value)||0;
+  if(!gcValidate(v0,wp,k))return;
+  const result=gcCalculateGamma(type,v0,wp,k);
+  if(result.error){alert('Error: Velocity ≥ c. Use v₀ < 1');return;}
+  document.getElementById('gc-singleResult').classList.remove('hidden');
+  const rv=document.getElementById('gc-resultValue');
+  if(result.isComplex){rv.innerHTML=`γ = <span style="color:var(--phosphor);text-shadow:var(--glow-g);">i × ${result.gamma.toFixed(8)}</span>  [<span style="color:var(--phosphor)">UNSTABLE — growth</span>]`;}
+  else{rv.innerHTML=`γ = <span style="color:var(--amber)">${result.gamma.toFixed(8)}</span>  [<span style="color:var(--amber)">STABLE — oscillation</span>]`;}
+  let det=`<strong>Type:</strong> ${result.isComplex?'<span style="color:var(--phosphor)">Imaginary — UNSTABLE</span>':'<span style="color:var(--amber)">Real — stable oscillatory</span>'}<br>`;
+  if(result.gamma0)det+=`<strong>Lorentz γ₀:</strong> ${result.gamma0.toFixed(8)}<br>`;
+  det+=`<strong>Parameters:</strong> v₀=${v0}, ωₚ=${wp}, k=${k}`;
+  document.getElementById('gc-resultDetails').innerHTML=det;
+  document.getElementById('gc-intermediateValues').innerHTML=`
+    Term 1 (2v₀²k² + ...): ${result.term1.toFixed(8)}<br>
+    Inner √ argument: ${result.innerSqrt.toFixed(8)}<br>
+    Inner √ value (term2): ${result.term2.toFixed(8)}<br>
+    Inside bracket (term1-term2): ${result.insideBracket.toFixed(8)}<br>
+    Final γ = √(½×|bracket|) = ${result.isComplex?'i×':''}${result.gamma.toFixed(8)}`;
+}
+
+function gcGeneratePlot(){
+  const type=document.getElementById('gc-formulaType').value;
+  const v0=parseFloat(document.getElementById('gc-v0').value)||0;
+  const wp=parseFloat(document.getElementById('gc-wp').value)||0;
+  if(!gcValidate(v0,wp,0.01))return;
+  if(gcFormulas[type].relativistic&&v0>=1){alert('v₀ ≥ c');return;}
+  const kMin=0.01,kMax=5.0,numPts=300,kValues=[],gammaReal=[],gammaImag=[];
+  for(let i=0;i<numPts;i++){
+    const k=kMin+(kMax-kMin)*i/(numPts-1);kValues.push(k);
+    const result=gcCalculateGamma(type,v0,wp,k);
+    if(result.error||isNaN(result.gamma)){gammaReal.push(null);gammaImag.push(null);}
+    else if(result.isComplex){gammaReal.push(null);gammaImag.push(result.gamma);}
+    else{gammaReal.push(result.gamma);gammaImag.push(null);}
+  }
+  gcPlotData={type,v0,wp,kValues,gammaReal,gammaImag};
+  const g0=gcFormulas[type].relativistic?gcCalcLorentz(v0):null;
+  const sub=g0?`v₀=${v0.toFixed(4)}, ωₚ=${wp.toFixed(4)}, γ₀=${g0.toFixed(4)}`:`v₀=${v0.toFixed(4)}, ωₚ=${wp.toFixed(4)}`;
+  Plotly.newPlot('gc-plot',[
+    {x:kValues,y:gammaReal,mode:'lines',name:'Real γ (stable)',line:{color:'#22c55e',width:3},hovertemplate:'k=%{x:.3f}<br>Re(γ)=%{y:.5f}<extra></extra>'},
+    {x:kValues,y:gammaImag,mode:'lines',name:'Imaginary γ (growth)',line:{color:'#ef4444',width:3,dash:'dash'},hovertemplate:'k=%{x:.3f}<br>Im(γ)=%{y:.5f}<extra></extra>'},
+  ],{
+    title:{text:`${gcFormulas[type].name}<br><sub>${sub}</sub>`,font:{color:'#c8dde8',size:14}},
+    xaxis:{title:'k (Wave Number)',color:'#4a6578',gridcolor:'#0a1826',zerolinecolor:'#1a4060'},
+    yaxis:{title:'γ (Growth Rate)', color:'#4a6578',gridcolor:'#0a1826',zerolinecolor:'#1a4060'},
+    paper_bgcolor:'#030609',plot_bgcolor:'#07101a',
+    font:{color:'#c8dde8',family:'Share Tech Mono'},
+    legend:{bgcolor:'rgba(3,6,9,.85)',bordercolor:'#1a4060',borderwidth:1,x:.02,y:.98},
+    hovermode:'closest',
+  },{responsive:true,displaylogo:false,toImageButtonOptions:{format:'png',filename:`growth_rate_${type}_v0_${v0}_wp_${wp}`,height:600,width:900,scale:2}});
+  document.getElementById('gc-plotContainer').classList.remove('hidden');
+  document.getElementById('gc-exportBtn').classList.remove('hidden');
+}
+
+function gcExportData(){
+  if(!gcPlotData)return;
+  let csv='k,gamma_real,gamma_imaginary\n';
+  for(let i=0;i<gcPlotData.kValues.length;i++){
+    const k=gcPlotData.kValues[i];
+    const re=gcPlotData.gammaReal[i]!==null?gcPlotData.gammaReal[i]:'';
+    const im=gcPlotData.gammaImag[i]!==null?gcPlotData.gammaImag[i]:'';
+    csv+=`${k},${re},${im}\n`;
+  }
+  csv+=`\n# Formula: ${gcFormulas[gcPlotData.type].name}\n# v0: ${gcPlotData.v0}\n# omega_p: ${gcPlotData.wp}\n`;
+  dlBlob(csv,`growth_rate_${gcPlotData.type}_v0_${gcPlotData.v0}_wp_${gcPlotData.wp}.csv`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LIVE GROWTH LAB (from two_stream.html)
+// ═══════════════════════════════════════════════════════════════
+function setScenario(type,btn){
+  currentSC=type;
+  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const s=SC[type];
+  document.getElementById('gr-fname').textContent=s.name+' ('+s.ref+')';
+  document.getElementById('gr-feq').textContent=s.eq;
+  const lb=document.getElementById('lorentz-bar');
+  if(s.relativistic)lb.classList.remove('hidden');else lb.classList.add('hidden');
+  calcAuto();
+}
+
+let calcTimer=null;
+function calcAuto(){
+  clearTimeout(calcTimer);
+  calcTimer=setTimeout(()=>{updateLorentz();calcSingleLive();calcPlot();updateInsight();},60);
+}
+
+function updateLorentz(){
+  const v0=getV0();const s=SC[currentSC];
+  if(!s.relativistic)return;
+  const g0=lorentzFactor(v0);if(!g0)return;
+  document.getElementById('lz-g0').textContent=g0.toFixed(6);
+  document.getElementById('lz-g03').textContent=Math.pow(g0,3).toFixed(6);
+  document.getElementById('lz-beta').textContent=v0.toFixed(4);
+}
+
+function calcSingleLive(){
+  const v0=getV0(),wp=getWp(),k=getK();
+  const r=computeGamma(currentSC,v0,wp,k);
+  const rv=document.getElementById('gr-result-val'),rt=document.getElementById('gr-result-tbl');
+  if(r.error||isNaN(r.gamma)){rv.innerHTML='<span style="color:var(--pink)">Invalid parameters</span>';return;}
+  const s=SC[currentSC];
+  if(r.isComplex){rv.className='result-main result-green';rv.innerHTML=`γ = <strong>${r.growthRate.toFixed(8)}</strong> ω_pe  [UNSTABLE]`;}
+  else{rv.className='result-main result-amber';rv.innerHTML=`ω = ${r.oscFreq.toFixed(8)} ω_pe  [STABLE]`;}
+  const g0str=s.relativistic&&r.gamma0?r.gamma0.toFixed(6):'N/A';
+  const g3str=s.relativistic&&r.gamma0?Math.pow(r.gamma0,3).toFixed(6):'1 (NR)';
+  const rows=[['Scenario',`${s.name} (${s.ref})`],['v₀',v0],['ωₚ',wp],['k',k],
+    ['Lorentz γ₀',g0str],['γ₀³',g3str],
+    ['Term 1',r.term1.toFixed(8)],['Inner √',r.term2.toFixed(8)],
+    ['Bracket',r.insideBracket.toFixed(8)],
+    ['Mode',r.isComplex?'▲ UNSTABLE (Im(ω)>0)':'▷ STABLE (Re(ω) only)']];
+  rt.innerHTML=rows.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('');
+  const kc=kCutoff(currentSC,v0,wp);
+  if(kc){const pct=Math.min(100,(k/kc)*50);document.getElementById('stability-needle').style.left=pct+'%';}
+}
+
+function calcPlot(){
+  const v0=getV0(),wp=getWp(),kmax=getKmax();
+  if(v0<=0||v0>=1||wp<=0||kmax<=0)return;
+  const N=500,ks=[],gr=[],osc=[];
+  for(let i=0;i<N;i++){
+    const ki=0.001+kmax*i/(N-1);ks.push(ki);
+    const r=computeGamma(currentSC,v0,wp,ki);
+    if(r.error||isNaN(r.gamma)){gr.push(null);osc.push(null);}
+    else{gr.push(r.isComplex?r.growthRate:null);osc.push(!r.isComplex?r.oscFreq:null);}
+  }
+  calcData={ks,gr,osc,v0,wp,type:currentSC};
+  const s=SC[currentSC];
+  const g0=s.relativistic?lorentzFactor(v0):null;
+  const sub=g0?`v₀=${v0}, ωₚ=${wp}, γ₀=${g0.toFixed(4)}`:`v₀=${v0}, ωₚ=${wp}`;
+  let maxGr=0,kMaxGr=0;
+  for(let i=0;i<ks.length;i++){if(gr[i]&&gr[i]>maxGr){maxGr=gr[i];kMaxGr=ks[i];}}
+  Plotly.react('gr-plot',[
+    {x:ks,y:osc,mode:'lines',name:'Real γ (stable)',line:{color:'#ff9f1c',width:2},hovertemplate:'k=%{x:.3f}<br>Re(γ)=%{y:.5f}<extra></extra>'},
+    {x:ks,y:gr, mode:'lines',name:'Im(γ) — growth',line:{color:'#39ff14',width:2.5,dash:'dash'},hovertemplate:'k=%{x:.3f}<br>Im(γ)=%{y:.5f}<extra></extra>'},
+    {x:[kMaxGr],y:[maxGr],mode:'markers',name:`Peak γ=${maxGr.toFixed(4)} at k=${kMaxGr.toFixed(3)}`,marker:{color:'#ff3e9d',size:10,symbol:'diamond'},hovertemplate:'k_max=%{x:.3f}<br>γ_max=%{y:.5f}<extra></extra>'}
+  ],{
+    title:{text:`${s.name}  —  ${s.ref}<br><sub>${sub}</sub>`,font:{color:'#c8dde8',size:13}},
+    xaxis:{title:'k  [ωₚ/c]',color:'#4a6578',gridcolor:'#0a1826',zerolinecolor:'#1a4060'},
+    yaxis:{title:'γ  [ωₚ]',  color:'#4a6578',gridcolor:'#0a1826',zerolinecolor:'#1a4060'},
+    paper_bgcolor:'#030609',plot_bgcolor:'#07101a',
+    font:{color:'#c8dde8',family:'Share Tech Mono'},
+    legend:{bgcolor:'rgba(3,6,9,.85)',bordercolor:'#1a4060',borderWidth:1,x:.02,y:.98},
+    hovermode:'x unified',
+    shapes:[{type:'line',x0:kMaxGr,x1:kMaxGr,y0:0,y1:maxGr,line:{color:'#ff3e9d',width:1,dash:'dot'}}]
+  },{responsive:true,displaylogo:false});
+  const kc=kCutoff(currentSC,v0,wp);
+  document.getElementById('gr-pills').innerHTML=[
+    `<span class="pill pill-ok">γ_max = ${maxGr.toFixed(5)}</span>`,
+    `<span class="pill pill-info">k_max = ${kMaxGr.toFixed(3)}</span>`,
+    kc?`<span class="pill pill-warn">k_cutoff ≈ ${kc.toFixed(3)}</span>`:`<span class="pill pill-dim">no cutoff</span>`,
+    s.relativistic?`<span class="pill pill-info">γ₀ = ${lorentzFactor(v0)?.toFixed(4)}</span>`:''
+  ].join('');
+  document.getElementById('gr-export-btn').classList.remove('hidden');
+}
+
+function updateInsight(){
+  const v0=getV0(),wp=getWp(),k=getK();
+  const s=SC[currentSC];const r=computeGamma(currentSC,v0,wp,k);const kc=kCutoff(currentSC,v0,wp);
+  if(r.error){document.getElementById('insight-text').innerHTML='Invalid parameters.';return;}
+  const g0=s.relativistic?lorentzFactor(v0):1.0;
+  const mode=r.isComplex?'<span class="insight-pos">UNSTABLE</span>':'<span class="insight-neg">STABLE</span>';
+  let txt='';
+  if(r.isComplex){
+    txt=`System is ${mode} at k = <span class="insight-val">${k.toFixed(2)}</span>. Growth rate γ = <span class="insight-val">${r.growthRate.toFixed(5)}</span> ωₚ. E-field doubles every <span class="insight-val">${(Math.LN2/r.growthRate).toFixed(1)}</span> ωₚ⁻¹. Saturation at t ~ <span class="insight-val">${(3/r.growthRate).toFixed(1)}</span> ωₚ⁻¹. ${kc?`Cutoff at k > <span class="insight-val">${kc.toFixed(3)}</span>.`:'No high-k cutoff.'} ${s.relativistic?`γ₀³ = <span class="insight-val">${Math.pow(g0,3).toFixed(3)}</span> suppresses growth.`:''} ${v0>0.8?'<span class="insight-neg">Highly relativistic — strong suppression.</span>':''}`;
+  }else{
+    txt=`System is ${mode} at k = <span class="insight-val">${k.toFixed(2)}</span>. Oscillation freq ω = <span class="insight-val">${r.oscFreq.toFixed(5)}</span> ωₚ. Try k < <span class="insight-val">${kc?kc.toFixed(3):'—'}</span> for growth. ${s.relativistic&&v0>0.7?`<span class="insight-pos">Relativistic: γ₀³=${Math.pow(g0,3).toFixed(2)} suppresses ωₚ_eff.</span>`:''}`;
+  }
+  document.getElementById('insight-text').innerHTML=txt;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPARISON (from two_stream.html)
+// ═══════════════════════════════════════════════════════════════
+function genCompare(){
+  const v0=parseFloat(document.getElementById('cmp-v0').value)||0.6;
+  const wp=parseFloat(document.getElementById('cmp-wp').value)||1.0;
+  const km=parseFloat(document.getElementById('cmp-kmax').value)||3;
+  const show={'non-rel-single':document.getElementById('cmp-nrs').checked,'rel-single':document.getElementById('cmp-rs').checked,'non-rel-multi':document.getElementById('cmp-nrm').checked,'rel-multi':document.getElementById('cmp-rm').checked};
+  const N=500,traces=[],kcutRows=[];
+  cmpData={v0,wp,sets:{}};
+  Object.entries(SC).forEach(([type,s])=>{
+    if(!show[type])return;
+    const ks=[],gr=[];
+    for(let i=0;i<N;i++){const ki=0.001+km*i/(N-1);ks.push(ki);const r=computeGamma(type,v0,wp,ki);gr.push(r.error?null:r.growthRate);}
+    cmpData.sets[type]={ks,gr};
+    traces.push({x:ks,y:gr,mode:'lines',name:`${s.name} (${s.ref})`,line:{color:s.color,width:2.5},hovertemplate:`${s.name}<br>k=%{x:.3f}<br>Im(γ)=%{y:.5f}<extra></extra>`});
+    const kc=kCutoff(type,v0,wp);const g3=s.relativistic?Math.pow(lorentzFactor(v0)||1,3).toFixed(4):'1 (NR)';
+    kcutRows.push(`<tr><td style="color:${s.color}">${s.name}</td><td>${s.ref}</td><td>${kc?kc.toFixed(4):'—'}</td><td>${g3}</td></tr>`);
+  });
+  Plotly.react('cmp-plot',traces,{
+    title:{text:`All Regimes — Im(γ) growth rate vs k<br><sub>v₀=${v0}, ωₚ=${wp}</sub>`,font:{color:'#c8dde8',size:13}},
+    xaxis:{title:'k  [ωₚ/c]',color:'#4a6578',gridcolor:'#0a1826',zerolinecolor:'#1a4060',range:[0,km]},
+    yaxis:{title:'Im(γ)  [ωₚ]',color:'#4a6578',gridcolor:'#0a1826',zerolinecolor:'#1a4060'},
+    paper_bgcolor:'#030609',plot_bgcolor:'#07101a',
+    font:{color:'#c8dde8',family:'Share Tech Mono'},
+    legend:{bgcolor:'rgba(3,6,9,.9)',bordercolor:'#1a4060',borderwidth:1,x:.01,y:.99},
+    hovermode:'x unified',
+  },{responsive:true,displaylogo:false});
+  document.getElementById('cmp-export').classList.remove('hidden');
+  document.getElementById('cmp-kcut-div').innerHTML=`<table class="kcut-table"><tr><th>Scenario</th><th>Equation</th><th>k_cutoff</th><th>γ₀³ at v₀=${v0}</th></tr>${kcutRows.join('')}</table>`;
+}
+
+function plotSimData(){
+  const v0=parseFloat(document.getElementById('sim-v0-sel').value);
+  const dp=SIM_DATA[v0];if(!dp)return;
+  const showNR=document.getElementById('sim-show-nr').checked;
+  const showRel=document.getElementById('sim-show-rel').checked;
+  const showSim=document.getElementById('sim-show-sim').checked;
+  const showAna=document.getElementById('sim-show-ana').checked;
+  const traces=[],km=Math.max(...dp.k)*1.3,wp=1.0;
+  if(showNR){const ks=[],gr=[];for(let i=0;i<400;i++){const ki=0.001+km*i/399;ks.push(ki);const r=computeGamma('non-rel-single',v0,wp,ki);gr.push(r.error?null:r.growthRate);}traces.push({x:ks,y:gr,mode:'lines',name:'NR analytical (Eq.18)',line:{color:'#ff9f1c',width:2,dash:'dash'}});}
+  if(showRel){const ks=[],gr=[];for(let i=0;i<400;i++){const ki=0.001+km*i/399;ks.push(ki);const r=computeGamma('rel-single',v0,wp,ki);gr.push(r.error?null:r.growthRate);}traces.push({x:ks,y:gr,mode:'lines',name:'Rel analytical (Eq.19)',line:{color:'#00d4ff',width:2}});}
+  if(showAna)traces.push({x:dp.k,y:dp.analytical,mode:'markers',name:'Analytical (table)',marker:{color:'#ff9f1c',size:9,symbol:'circle'},hovertemplate:'k=%{x}<br>γ_ana=%{y:.6f}<extra></extra>'});
+  if(showSim)traces.push({x:dp.k,y:dp.simulation,mode:'markers',name:'SMILEI simulation',marker:{color:'#39ff14',size:9,symbol:'diamond'},hovertemplate:'k=%{x}<br>γ_sim=%{y:.6f}<extra></extra>'});
+  Plotly.react('sim-plot',traces,{
+    title:{text:`Growth Rate — v₀ = ${v0} (SMILEI PIC data)`,font:{color:'#c8dde8',size:13}},
+    xaxis:{title:'k  [ωₚ/c]',color:'#4a6578',gridcolor:'#0a1826'},
+    yaxis:{title:'γ  [ωₚ]',  color:'#4a6578',gridcolor:'#0a1826'},
+    paper_bgcolor:'#030609',plot_bgcolor:'#07101a',
+    font:{color:'#c8dde8',family:'Share Tech Mono'},
+    legend:{bgcolor:'rgba(3,6,9,.9)',bordercolor:'#1a4060',x:.02,y:.98},
+    hovermode:'closest',
+  },{responsive:true,displaylogo:false});
+  let tbl=`<table class="sim-data-table"><tr><th>k</th><th>γ_analytical</th><th>γ_simulation</th><th>Error %</th></tr>`;
+  dp.k.forEach((k,i)=>{const err=Math.abs(dp.simulation[i]-dp.analytical[i])/dp.analytical[i]*100;tbl+=`<tr><td>${k}</td><td>${dp.analytical[i].toFixed(6)}</td><td>${dp.simulation[i].toFixed(6)}</td><td style="color:${err<5?'#39ff14':err<10?'#ff9f1c':'#ff3e9d'}">${err.toFixed(2)}%</td></tr>`;});
+  tbl+='</table>';
+  document.getElementById('sim-data-table-wrap').innerHTML=tbl;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIMULATION BOX — exact from simulation-box.html
+// ═══════════════════════════════════════════════════════════════
+const NS='http://www.w3.org/2000/svg';
+function se(tag,a={}){const e=document.createElementNS(NS,tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));return e;}
+function st(x,y,str,a={}){const t=se('text',{x,y,'font-family':'JetBrains Mono','font-size':'11',fill:'#e8eaf0',...a});t.textContent=str;return t;}
+function sl(x1,y1,x2,y2,a={}){return se('line',{x1,y1,x2,y2,...a});}
+function sr(x,y,w,h,a={}){return se('rect',{x,y,width:w,height:h,...a});}
+function sc(cx,cy,r,a={}){return se('circle',{cx,cy,r,...a});}
+const BX=60,BY=205,BW=920,BH=220,BR=980,BMID=315;
+function cosPath(ampFrac,phase=0){
+  const amp=Math.min(ampFrac,.93)*(BH/2-8);
+  return Array.from({length:201},(_,i)=>{const f=i/200,x=BX+f*BW,y=BMID-amp*Math.cos(2*Math.PI*f+phase);return(i===0?'M ':'L ')+x.toFixed(1)+' '+y.toFixed(1);}).join(' ');
+}
+
+function drawBox(){
+  const k=parseFloat(document.getElementById('b-k').value)||0.1;
+  const v=parseFloat(document.getElementById('b-v').value)||0.6;
+  const dn=parseFloat(document.getElementById('b-dn').value)||1e-6;
+  const dx=parseFloat(document.getElementById('b-dx').value)||0.05;
+  const T=parseFloat(document.getElementById('b-T').value)||150;
+  const type=document.getElementById('b-scenario').value;
+  const L=2*Math.PI/k,Nc=Math.round(L/dx),wp=1.0;
+  const res=computeGamma(type,v,wp,k);
+  const unstable=res.isComplex,gamma=res.growthRate;
+  const kcut=kCutoff(type,v,wp),scObj=SC[type],cfl_ok=0.0095<dx;
+  const g=document.getElementById('box-dyn');
+  while(g.firstChild)g.removeChild(g.firstChild);
+  g.appendChild(sr(BX,BY,BW,BH,{rx:'4',fill:'none',stroke:'#1e3a5f','stroke-width':'12',opacity:'.4',filter:'url(#glow2)'}));
+  g.appendChild(sr(BX,BY,BW,BH,{rx:'4',fill:'#0d1525',stroke:'#2a4a72','stroke-width':'2'}));
+  for(let i=1;i<16;i++){const x=BX+BW/16*i;g.appendChild(sl(x,BY,x,BY+BH,{stroke:'#1a2d45','stroke-width':'1',opacity:'.7'}));}
+  const dAmp=Math.min(Math.max(dn*50,.08),.92);
+  g.appendChild(se('path',{d:cosPath(dAmp,0),fill:'none',stroke:'#f9c74f','stroke-width':'2.5',opacity:'.9',filter:'url(#glow)'}));
+  g.appendChild(st(530,BY-18,`n(x) = 0.5 + δn·cos(${k.toFixed(3)}x)   [δn = ${dn.toExponential(1)}]`,{'text-anchor':'middle',fill:'#f9c74f','font-size':'11'}));
+  g.appendChild(se('path',{d:cosPath(dAmp*.82,Math.PI/2),fill:'none',stroke:'#7eb8f7','stroke-width':'2',opacity:'.6','stroke-dasharray':'6,3'}));
+  g.appendChild(st(760,BY+14,'Ex(x, t=0) — solve_poisson = True',{'text-anchor':'middle',fill:'#7eb8f7','font-size':'10.5'}));
+  if(!unstable){g.appendChild(sr(BX,BY,BW,BH,{fill:'#f07167',opacity:'.06',rx:'4'}));g.appendChild(st(530,BMID,'STABLE MODE — bracket > 0 — no instability growth',{'text-anchor':'middle',fill:'#f07167','font-size':'13','font-weight':'600'}));}
+  [200,400,600,800].forEach(ax=>{if(ax-80>BX&&ax<BR)g.appendChild(sl(ax,BY+60,ax-80,BY+60,{stroke:'#f07167','stroke-width':'2.5','marker-end':'url(#ar)',filter:'url(#glow)'}));});
+  g.appendChild(st(180,BY+53,`eon1: −${v.toFixed(2)}c`,{'text-anchor':'middle',fill:'#f07167','font-size':'11'}));
+  [200,400,600,800].forEach(ax=>{if(ax+80<BR&&ax>BX)g.appendChild(sl(ax,BY+160,ax+80,BY+160,{stroke:'#80b918','stroke-width':'2.5','marker-end':'url(#ag)',filter:'url(#glow)'}));});
+  g.appendChild(st(180,BY+174,`eon2: +${v.toFixed(2)}c`,{'text-anchor':'middle',fill:'#80b918','font-size':'11'}));
+  if(!scObj.multi){for(let i=0;i<14;i++){const ix=BX+BW/13*i;g.appendChild(sc(ix,BMID,3,{fill:'#ff99c8',opacity:'.55'}));}g.appendChild(st(530,BY+BH-12,'ions: frozen (time_frozen = 10000), uniform n = 1',{'text-anchor':'middle',fill:'#ff99c8','font-size':'10',opacity:'.8'}));}
+  else{[200,400,600,800].forEach(ax=>{g.appendChild(sl(ax,BMID-5,ax-60,BMID-5,{stroke:'#ff99c8','stroke-width':'1.5','marker-end':'url(#ar)',opacity:'.7'}));g.appendChild(sl(ax,BMID+5,ax+60,BMID+5,{stroke:'#ff99c8','stroke-width':'1.5','marker-end':'url(#ag)',opacity:'.7'}));});g.appendChild(st(530,BY+BH-12,'ions: evolving (multi-species — time_frozen NOT set)',{'text-anchor':'middle',fill:'#ff99c8','font-size':'10',opacity:'.8'}));}
+  g.appendChild(sr(BR-224,BY+4,220,22,{rx:'4',fill:'#1a0d30',stroke:'#c77dff','stroke-width':'1',opacity:'.9'}));
+  g.appendChild(st(BR-114,BY+19,`${scObj.name}  |  ${scObj.ref}`,{'text-anchor':'middle',fill:'#c77dff','font-size':'9.5'}));
+  g.appendChild(sr(BX-5,BY-4,10,BH+8,{rx:'2',fill:'#2a6496',opacity:'.85'}));
+  g.appendChild(sr(BR-5,BY-4,10,BH+8,{rx:'2',fill:'#2a6496',opacity:'.85'}));
+  g.appendChild(st(BX-18,BMID,'PERIODIC BC',{'text-anchor':'middle',fill:'#7eb8f7','font-size':'10',transform:`rotate(-90,${BX-18},${BMID})`}));
+  g.appendChild(st(BR+18,BMID,'PERIODIC BC',{'text-anchor':'middle',fill:'#7eb8f7','font-size':'10',transform:`rotate(90,${BR+18},${BMID})`}));
+  g.appendChild(se('path',{d:'M 980 201 Q 1030 148,1030 98 Q 1030 48,520 48 Q 10 48,10 98 Q 10 148,60 201',fill:'none',stroke:'#2a6496','stroke-width':'1.5','stroke-dasharray':'5,4','marker-end':'url(#ab)',opacity:'.65'}));
+  g.appendChild(st(530,41,'particle leaving right → re-enters from left',{'text-anchor':'middle',fill:'#7eb8f7','font-size':'10',opacity:'.75'}));
+  const dimY=BY+BH+50;
+  g.appendChild(sl(BX,dimY,BR,dimY,{stroke:'#f9c74f','stroke-width':'1.5','marker-start':'url(#ayr)','marker-end':'url(#ay)'}));
+  g.appendChild(sl(BX,dimY-7,BX,dimY+7,{stroke:'#f9c74f','stroke-width':'1.5'}));
+  g.appendChild(sl(BR,dimY-7,BR,dimY+7,{stroke:'#f9c74f','stroke-width':'1.5'}));
+  const Lv=L.toFixed(3);
+  g.appendChild(sr(390,dimY-13,280,24,{rx:'4',fill:'#0d1525',stroke:'#f9c74f','stroke-width':'1'}));
+  g.appendChild(st(530,dimY+5,`L = 2π / ${k} = ${Lv}`,{'text-anchor':'middle',fill:'#f9c74f','font-size':'11.5'}));
+  g.appendChild(st(530,dimY+28,`← 1 full wavelength   λ = ${Lv} c/ω_pe →`,{'text-anchor':'middle',fill:'#f9c74f','font-size':'10',opacity:'.6'}));
+  g.appendChild(sr(BX,BY,51,BH,{fill:'none',stroke:'#80b918','stroke-width':'1.5','stroke-dasharray':'4,3',opacity:'.7'}));
+  g.appendChild(sl(BX,BY,90,553,{stroke:'#80b918','stroke-width':'1',opacity:'.4','stroke-dasharray':'3,3'}));
+  g.appendChild(sl(BX+51,BY,310,553,{stroke:'#80b918','stroke-width':'1',opacity:'.4','stroke-dasharray':'3,3'}));
+  g.appendChild(sr(90,553,220,72,{rx:'6',fill:'#0f1e12',stroke:'#80b918','stroke-width':'1.5'}));
+  g.appendChild(st(200,570,'CELL DETAIL (zoomed)',{'text-anchor':'middle',fill:'#80b918','font-size':'10','font-weight':'600'}));
+  for(let i=0;i<4;i++){g.appendChild(sr(105+i*40,575,40,22,{fill:'none',stroke:'#80b918','stroke-width':'1'}));g.appendChild(sc(125+i*40,586,2.5,{fill:i%2===0?'#f07167':'#80b918',opacity:'.85'}));}
+  g.appendChild(sl(105,602,145,602,{stroke:'#80b918','stroke-width':'1','marker-start':'url(#ayr)','marker-end':'url(#ay)',opacity:'.8'}));
+  g.appendChild(st(125,614,`Δx = ${dx}`,{'text-anchor':'middle',fill:'#80b918','font-size':'9.5'}));
+  g.appendChild(st(272,612,'100 PPC',{'text-anchor':'middle',fill:'#80b918','font-size':'9.5'}));
+  g.appendChild(st(530,BY-36,'1D CARTESIAN SIMULATION BOX',{'text-anchor':'middle',fill:'#e8eaf0','font-size':'14','font-weight':'600'}));
+  g.appendChild(st(BX,BY+BH+20,'x = 0',{'text-anchor':'start',fill:'#8892a4','font-size':'11'}));
+  g.appendChild(st(BR,BY+BH+20,`x = ${Lv}  c/ω_pe`,{'text-anchor':'end',fill:'#8892a4','font-size':'11'}));
+  g.appendChild(sl(BX,BY-17,BR,BY-17,{stroke:'#f9c74f','stroke-width':'1',opacity:'.2','stroke-dasharray':'8,4'}));
+  g.appendChild(st(530,BY-8,`k = 2π × xnumber / L = 2π × 1 / ${Lv} = ${k.toFixed(4)} ✓`,{'text-anchor':'middle',fill:'#f9c74f','font-size':'10.5',opacity:'.75'}));
+  const rx=BR+22;
+  const rg3=scObj.relativistic?Math.pow(lorentzFactor(v)||1,3).toFixed(3):'1 (NR)';
+  [[`N_cells = ${Nc}`,Nc<50?'#f07167':Nc<200?'#f9a825':'#80b918'],
+   [`Δt = 0.0095`,'#aab4c4'],[`CFL: Δt < Δx = ${dx}`,cfl_ok?'#80b918':'#f07167'],
+   [`γ = ${unstable?gamma.toFixed(4)+' ω_pe':'0 (stable)'}`,unstable?'#80b918':'#f07167'],
+   [`bracket ${unstable?'< 0 (growth)':'> 0 (stable)'}`,unstable?'#80b918':'#f07167'],
+   [`k_cutoff ≈ ${kcut?kcut.toFixed(3):'N/A'}`,'#aab4c4'],[`γ₀′³ = ${rg3}`,'#aab4c4'],
+   [`sim time = ${T}`,'#aab4c4'],[`steps ≈ ${Math.round(T/0.0095).toLocaleString()}`,'#aab4c4'],
+  ].forEach(([lbl,col],i)=>g.appendChild(st(rx,BY+20+i*17,lbl,{fill:col,'font-size':'10.5'})));
+  g.appendChild(sr(BX+2,BY+2,202,92,{rx:'4',fill:'#0d1525',opacity:'.88',stroke:'#1e2a3a','stroke-width':'1'}));
+  [{c:'#f9c74f',d:'',l:'density n(x)'},{c:'#7eb8f7',d:'5,3',l:'field Ex(x)'},{c:'#f07167',d:'',l:`eon1 (−${v.toFixed(2)}c)`},{c:'#80b918',d:'',l:`eon2 (+${v.toFixed(2)}c)`},{c:'#ff99c8',d:'3,2',l:scObj.multi?'ions (moving)':'ions (frozen)'}].forEach((item,i)=>{const ly=BY+18+i*16;g.appendChild(sl(BX+10,ly,BX+36,ly,{stroke:item.c,'stroke-width':'2',...(item.d?{'stroke-dasharray':item.d}:{})}));g.appendChild(st(BX+42,ly+4,item.l,{fill:item.c,'font-size':'10'}));});
+  // status + legend
+  const pills=[
+    {l:`L = ${L.toFixed(3)} c/ω_pe`,c:'pill-info'},
+    {l:`N_cells = ${Nc}`,c:Nc<50?'pill-bad':Nc<200?'pill-warn':'pill-ok'},
+    {l:`CFL ${cfl_ok?'✓':'✗'}: Δt=0.0095 < Δx=${dx}`,c:cfl_ok?'pill-ok':'pill-bad'},
+    {l:unstable?`γ = ${gamma.toFixed(4)} ω_pe`:`STABLE — bracket > 0`,c:unstable?'pill-ok':'pill-warn'},
+    {l:`k_cutoff ≈ ${kcut?kcut.toFixed(3):'N/A'}`,c:'pill-info'},
+    {l:'xnumber = 1 ✓',c:'pill-ok'},{l:`${scObj.ref}`,c:'pill-dim'},
+    {l:`δn = ${dn.toExponential(1)} — ${dn>.1?'nonlinear ✗':'linear ✓'}`,c:dn>.1?'pill-bad':'pill-ok'},
+    {l:`γ₀′³ = ${rg3}`,c:'pill-info'},
+  ];
+  document.getElementById('box-status').innerHTML=pills.map(p=>`<span class="pill ${p.c}">${p.l}</span>`).join('');
+  const lv=lorentzFactor(v),g3str=scObj.relativistic&&lv?`γ₀′³ = ${Math.pow(lv,3).toFixed(4)} (Lorentz suppression)`:'γ₀′³ = 1 (classical, no correction)';
+  document.getElementById('box-legend').innerHTML=`
+    <div class="legend-card"><h3>Box Geometry</h3><p><code>grid_length = ${L.toFixed(3)}</code><br>L = 2π/k = 2π/${k}. Exactly one full wavelength → <code>xnumber = 1</code> ✓.</p></div>
+    <div class="legend-card"><h3>Grid &amp; Resolution</h3><p><code>cell_length = ${dx}</code><br>N_cells = ${Nc}. ${Nc<50?'<b style="color:#f07167">⚠ Too coarse</b>':Nc<200?'<b style="color:#f9a825">⚠ Marginal</b>':'<b style="color:#80b918">✓ Well resolved</b>'}.</p></div>
+    <div class="legend-card"><h3>Regime — ${scObj.ref}</h3><p>${scObj.name}.<br>${g3str}.<br>${scObj.multi?'Both e⁻ &amp; ions evolve.':'Ions frozen: <code>time_frozen = 10000</code>.'}</p></div>
+    <div class="legend-card"><h3>Instability Status</h3><p>bracket ${unstable?'&lt; 0 → <b style="color:#80b918">GROWTH</b>':'&gt; 0 → <b style="color:#f07167">STABLE</b>'}<br>γ = ${unstable?`<b style="color:#80b918">${gamma.toFixed(5)} ω_pe</b><br>5 e-folds at t ≈ ${(5/gamma).toFixed(1)}  T=${T} ${T>5/gamma?'✓':'⚠'}`:' 0 (stable)'}</p></div>
+    <div class="legend-card"><h3>Electric Field t=0</h3><p><code>solve_poisson = True</code><br>Solves ∇²φ=−ρ/ε₀ before t=0. Without this, Ex=0 even with density perturbation → instability never seeds.</p></div>
+    <div class="legend-card"><h3>CFL &amp; Timestep</h3><p><code>timestep = 0.0095</code><br>CFL: Δt &lt; Δx/c = ${dx} → <b style="color:${cfl_ok?'#80b918':'#f07167'}">${cfl_ok?'✓ stable':'✗ VIOLATION'}</b><br>Steps ≈ ${Math.round(T/0.0095).toLocaleString()}</p></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHASE SPACE — exact from two_stream.html
+// ═══════════════════════════════════════════════════════════════
+const PS={running:false,animId:null,t:0,dt:0.05,particles:[],N:300};
+
+function initPhaseSpace(){
+  cancelAnimationFrame(PS.animId);PS.running=false;
+  document.getElementById('ps-play-btn').textContent='▶ Play';
+  PS.t=0;
+  const v0=parseFloat(document.getElementById('ps-v0').value)||.3;
+  const k=parseFloat(document.getElementById('ps-k').value)||1.0;
+  const dn=parseFloat(document.getElementById('ps-dn').value)||.05;
+  const N=PS.N;PS.particles=[];
+  for(let i=0;i<N;i++){
+    const x=(i/N)*2*Math.PI/k;
+    PS.particles.push({x,px:v0*(1+dn*Math.sin(k*x)),beam:1});
+    PS.particles.push({x,px:-v0*(1+dn*Math.sin(k*x+Math.PI)),beam:2});
+  }
+  PS.L=2*Math.PI/k;PS.v0=v0;PS.k=k;PS.dn=dn;
+  const r=computeGamma('rel-single',v0,1.0,k);
+  PS.gamma=r.isComplex?r.growthRate:0;
+  drawPhaseSpace();updateEfieldPlot();
+}
+
+function drawPhaseSpace(){
+  const canvas=document.getElementById('phase-canvas');
+  const ctr=document.getElementById('phase-canvas-container');
+  canvas.width=ctr.offsetWidth||600;canvas.height=400;
+  const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;
+  ctx.fillStyle='#03060a';ctx.fillRect(0,0,W,H);
+  const px_range=PS.v0*2.5,L=PS.L;
+  const toX=x=>(x/L)*W;
+  const toY=px=>H/2-(px/px_range)*(H/2-20);
+  ctx.strokeStyle='#0a1826';ctx.lineWidth=.8;
+  for(let i=0;i<=10;i++){const x=W*i/10;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();const y=H*i/10;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.strokeStyle='#1a4060';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,toY(PS.v0));ctx.lineTo(W,toY(PS.v0));ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,toY(-PS.v0));ctx.lineTo(W,toY(-PS.v0));ctx.stroke();
+  const mode=document.getElementById('ps-mode').value;
+  const colorM=document.getElementById('ps-color').value;
+  PS.particles.forEach(p=>{
+    if(mode==='beam1'&&p.beam!==1)return;
+    if(mode==='beam2'&&p.beam!==2)return;
+    let color;
+    if(colorM==='beam')color=p.beam===1?'#39ff14':'#ff9f1c';
+    else if(colorM==='energy'){const ekin=.5*p.px*p.px;const frac=Math.min(1,ekin/(PS.v0*PS.v0));color=`hsl(${120-frac*120},100%,60%)`;}
+    else{const phase=(p.x%L)/L;color=`hsl(${phase*360},80%,60%)`;}
+    ctx.fillStyle=color;ctx.globalAlpha=.7;
+    const xx=((p.x%L)+L)%L;
+    ctx.fillRect(toX(xx)-1.5,toY(p.px)-1.5,3,3);
+  });
+  ctx.globalAlpha=1;
+  ctx.fillStyle='#4a6578';ctx.font='11px Share Tech Mono';
+  ctx.fillText(`x  [0, L=2π/${PS.k.toFixed(2)}]`,10,H-8);
+  ctx.save();ctx.translate(14,H/2);ctx.rotate(-Math.PI/2);ctx.fillText('pₓ',0,0);ctx.restore();
+  document.getElementById('phase-time-overlay').textContent=`t = ${PS.t.toFixed(1)}`;
+  document.getElementById('ps-time-display').textContent=`t = ${PS.t.toFixed(2)} ω⁻¹ₚ`;
+  const satT=PS.gamma>0?3/PS.gamma:Infinity;
+  let phase='Initial two-stream configuration';
+  if(PS.t>satT*.3)phase='Trapping — cat\'s eye formation';
+  if(PS.t>satT*.7)phase='Nonlinear saturation';
+  if(PS.t>satT)phase='Saturation — thermalized distribution';
+  document.getElementById('ps-phase-label').textContent='Phase: '+phase;
+}
+
+function stepPhaseAnim(){
+  const speed=parseInt(document.getElementById('ps-speed').value)||3;
+  for(let s=0;s<speed;s++){
+    const gamma=PS.gamma;
+    const Eamp=PS.dn*Math.exp(gamma*PS.t)*.3;
+    const L=PS.L,k=PS.k;
+    PS.particles.forEach(p=>{
+      const E=Eamp*Math.sin(k*p.x);
+      p.px+=-E*PS.dt;
+      p.x+=p.px*PS.dt;
+      while(p.x<0)p.x+=L;
+      while(p.x>L)p.x-=L;
+    });
+    PS.t+=PS.dt;
+  }
+  drawPhaseSpace();
+}
+
+function togglePhaseAnim(){
+  if(PS.running){PS.running=false;cancelAnimationFrame(PS.animId);document.getElementById('ps-play-btn').textContent='▶ Play';}
+  else{PS.running=true;document.getElementById('ps-play-btn').textContent='⏸ Pause';function loop(){if(!PS.running)return;stepPhaseAnim();PS.animId=requestAnimationFrame(loop);}loop();}
+}
+
+function resetPhaseAnim(){cancelAnimationFrame(PS.animId);PS.running=false;document.getElementById('ps-play-btn').textContent='▶ Play';initPhaseSpace();}
+
+function updateEfieldPlot(){
+  const N=200;const xs=[],ys=[];
+  const k=PS.k,L=PS.L,dn=PS.dn,t=PS.t,gamma=PS.gamma;
+  const Eamp=dn*Math.exp(gamma*t)*.5;
+  for(let i=0;i<N;i++){const x=L*i/(N-1);xs.push(x);ys.push(Eamp*Math.sin(k*x));}
+  Plotly.react('efield-plot',[{x:xs,y:ys,mode:'lines',name:'Eₓ(x)',line:{color:'#00d4ff',width:2}}],{
+    margin:{t:10,b:30,l:50,r:10},
+    xaxis:{title:'x',color:'#4a6578',gridcolor:'#0a1826'},
+    yaxis:{title:'Eₓ',color:'#4a6578',gridcolor:'#0a1826'},
+    paper_bgcolor:'#030609',plot_bgcolor:'#07101a',
+    font:{color:'#c8dde8',family:'Share Tech Mono'},showlegend:false,
+  },{responsive:true,displaylogo:false});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PLAYGROUND
+// ═══════════════════════════════════════════════════════════════
+const COLORS=['#39ff14','#00d4ff','#ff9f1c','#b06cff','#ff3e9d','#7fff00','#00ffcc'];
+function saveToPlayground(){
+  const v0=getV0(),wp=getWp(),kmax=getKmax();
+  const r=computeGamma(currentSC,v0,wp,getK());
+  const runId=savedRuns.length+1;
+  savedRuns.push({id:runId,v0,wp,kmax,type:currentSC,color:COLORS[(savedRuns.length)%COLORS.length],gamma:r.error?null:r.growthRate});
+  renderExpLog();
+}
+function renderExpLog(){
+  const el=document.getElementById('exp-log');
+  if(!savedRuns.length){el.innerHTML='<div style="color:var(--dim);text-align:center;padding:20px;">No runs saved yet.</div>';return;}
+  el.innerHTML=savedRuns.map(r=>`<div class="exp-row"><span class="exp-id">#${r.id}</span><span class="exp-v0">v₀=${r.v0}</span><span class="exp-k">wp=${r.wp}</span><span class="exp-gamma" style="color:${r.color}">γ=${r.gamma?r.gamma.toFixed(5):'N/A'}</span><span class="exp-type">${SC[r.type].ref}</span><span class="exp-del" onclick="deleteRun(${r.id})">✕</span></div>`).join('');
+}
+function deleteRun(id){savedRuns=savedRuns.filter(r=>r.id!==id);renderExpLog();}
+function clearRuns(){savedRuns=[];renderExpLog();}
+function overlayRuns(){
+  if(!savedRuns.length)return;
+  const traces=[];
+  savedRuns.forEach(run=>{
+    const ks=[],gr=[];
+    for(let i=0;i<400;i++){const ki=.001+run.kmax*i/399;ks.push(ki);const r=computeGamma(run.type,run.v0,run.wp,ki);gr.push(r.error?null:r.growthRate);}
+    traces.push({x:ks,y:gr,mode:'lines',name:`#${run.id} v₀=${run.v0} ${SC[run.type].ref}`,line:{color:run.color,width:2}});
+  });
+  Plotly.react('playground-plot',traces,{
+    title:{text:'Overlay — Saved Runs',font:{color:'#c8dde8',size:13}},
+    xaxis:{title:'k',color:'#4a6578',gridcolor:'#0a1826'},yaxis:{title:'Im(γ)',color:'#4a6578',gridcolor:'#0a1826'},
+    paper_bgcolor:'#030609',plot_bgcolor:'#07101a',font:{color:'#c8dde8',family:'Share Tech Mono'},
+    legend:{bgcolor:'rgba(3,6,9,.9)',bordercolor:'#1a4060',x:.01,y:.99},hovermode:'x unified',
+  },{responsive:true,displaylogo:false});
+}
+
+// CSV
+function dlBlob(content,filename){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'text/csv'}));a.download=filename;a.click();}
+function exportGrowthCSV(){if(!calcData)return;let csv=`k,gamma_growth,gamma_oscillation\n# ${SC[calcData.type].name} v0=${calcData.v0} wp=${calcData.wp}\n`;calcData.ks.forEach((k,i)=>csv+=`${k},${calcData.gr[i]??''},${calcData.osc[i]??''}\n`);dlBlob(csv,`gamma_${calcData.type}_v${calcData.v0}.csv`);}
+function exportCompareCsv(){if(!cmpData)return;const keys=Object.keys(cmpData.sets);const ks=cmpData.sets[keys[0]].ks;let csv=`k,${keys.map(k=>SC[k].name+'_Im_gamma').join(',')}\n`;ks.forEach((k,i)=>csv+=`${k},${keys.map(t=>cmpData.sets[t].gr[i]??'').join(',')}\n`);dlBlob(csv,`compare_all_v${cmpData.v0}.csv`);}
+
+// FAQ
+function toggleFaq(el){el.classList.toggle('open');el.nextElementSibling.classList.toggle('open');}
+
+// Mode toggle
+function setMode(mode,btn){
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.getElementById('concepts-beginner').classList.toggle('hidden',mode==='expert');
+  document.getElementById('concepts-expert').classList.toggle('hidden',mode==='beginner');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HERO CANVAS (from two_stream.html)
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const canvas=document.getElementById('hero-canvas');const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+  window.addEventListener('resize',resize);resize();
+  const N=120;
+  for(let i=0;i<N;i++)particles.push({x:Math.random()*1,px:(i<N/2?1:-1)*(.08+Math.random()*.04),phase:Math.random()*Math.PI*2,beam:i<N/2?1:2});
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);ctx.fillStyle='rgba(3,6,9,0.15)';ctx.fillRect(0,0,W,H);
+    t+=.008;const kk=2*Math.PI*3,Eamp=.03*Math.min(1,t/5);
+    particles.forEach(p=>{
+      const E=Eamp*Math.sin(kk*p.x+t*.5);p.px+=(-E-.001*p.px)*.016;p.x+=p.px*.016;
+      if(p.x<0)p.x+=1;if(p.x>1)p.x-=1;
+      const sx=p.x*W,sy=H/2-p.px*H*3;
+      ctx.beginPath();ctx.arc(sx,sy,2,0,Math.PI*2);
+      ctx.fillStyle=p.beam===1?'rgba(57,255,20,0.6)':'rgba(255,159,28,0.6)';ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// NAV
+const navLinks=document.querySelectorAll('.nav-link');
+const sections=document.querySelectorAll('[id]');
+function updateNav(){
+  let current='';
+  sections.forEach(s=>{const rect=s.getBoundingClientRect();if(rect.top<=100)current=s.id;});
+  navLinks.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+current));
+}
+window.addEventListener('scroll',updateNav);
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  gcUpdateFormula();
+  setScenario('non-rel-single',document.getElementById('sc-nrs'));
+  genCompare();
+  plotSimData();
+  initPhaseSpace();
+  drawBox();
+  Object.keys(sliderMap).forEach(k=>syncNum(k));
+});
+</script>
+
+// ═══ OBSERVATORY JS ═══
+
+// ═══════════════════════════════════════════════════════════════
+// OBSERVATORY — Live MMS Data Rendering
+// Plotly dark theme matching tsi.html palette
+// ═══════════════════════════════════════════════════════════════
+
+const PLY = {
+  paper_bgcolor: '#030609',
+  plot_bgcolor:  '#07101a',
+  font: { color:'#c8dde8', family:"'Share Tech Mono', monospace", size:12 },
+  xaxis: { color:'#4a6578', gridcolor:'#0a1826', zerolinecolor:'#1a4060', zeroline:false },
+  yaxis: { color:'#4a6578', gridcolor:'#0a1826', zerolinecolor:'#1a4060', zeroline:false },
+  margin: { t:30, b:55, l:70, r:25 },
+  hovermode: 'x unified',
+  legend: { bgcolor:'rgba(3,6,9,.9)', bordercolor:'#1a4060', borderwidth:1,
+            font:{size:11}, x:.01, y:.99 },
+};
+function pLay(ov={}) {
+  return {
+    ...PLY,
+    xaxis: { ...PLY.xaxis, ...(ov.xaxis||{}) },
+    yaxis: { ...PLY.yaxis, ...(ov.yaxis||{}) },
+    ...(ov.yaxis2 ? { yaxis2: {...PLY.yaxis, ...ov.yaxis2} } : {}),
+    ...Object.fromEntries(Object.entries(ov).filter(([k])=>!['xaxis','yaxis','yaxis2'].includes(k)))
+  };
+}
+const CFG = { responsive:true, displaylogo:false,
+  modeBarButtonsToRemove:['toImage','sendDataToCloud'] };
+
+async function loadJSON(url) {
+  try {
+    const r = await fetch(url + '?v=' + Date.now());
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+function kpi(val, lbl, note, cls) {
+  return `<div class="kpi-lg">
+    <div class="val ${cls||''}">${val ?? '—'}</div>
+    <div class="lbl">${lbl}</div>
+    ${note ? `<div class="note">${note}</div>` : ''}
+  </div>`;
+}
+
+function pill(txt, type) {
+  return `<span class="pill pill-${type}" style="font-size:.78rem;padding:5px 14px;">${txt}</span>`;
+}
+
+function setBanner(id, iconId, titleId, bodyId, status, icon, title, body) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'detect-banner ' + (
+    status === 'active'   ? 'db-active'   :
+    status === 'probable' ? 'db-probable' : 'db-quiet'
+  );
+  if (iconId)  document.getElementById(iconId).textContent = icon;
+  if (titleId) document.getElementById(titleId).innerHTML  = title;
+  if (bodyId)  document.getElementById(bodyId).innerHTML   = body;
+}
+
+// ── RENDER LIVE DATA ────────────────────────────────────────────────────────
+async function renderObservatory() {
+  const d = await loadJSON('results/mms_live.json');
+  if (!d || d.status === 'waiting') return;
+
+  const fgm  = d.magnetic_field      || {};
+  const edp  = d.electric_field      || {};
+  const el   = d.electrons           || {};
+  const ions = d.ions                || {};
+  const theory = d.theory_validation || {};
+  const chain  = d.tsi_weibel_chain  || {};
+  const lang   = d.langmuir_proxy    || {};
+  const der    = d.derived           || {};
+  const holes  = edp.electron_holes  || {};
+  const score  = d.tsi_score         || 0;
+  const status = d.tsi_status        || 'QUIET';
+
+  // ── Timestamp ──────────────────────────────────────────────────────────────
+  const tw = d.data_window_utc || [];
+  document.getElementById('obs-fetch-time').textContent =
+    'Fetched: ' + (d.fetched_utc||'').slice(0,16) + ' UTC';
+  document.getElementById('obs-data-window').textContent =
+    tw.length>=2 ? ('Data: ' + tw[0].slice(0,16) + ' → ' + tw[1].slice(0,16)) : '';
+
+  // ── TSI Banner ─────────────────────────────────────────────────────────────
+  const icons = { ACTIVE:'🔴', PROBABLE:'🟠', POSSIBLE:'🟡', QUIET:'🟢' };
+  const tsiEl = document.getElementById('tsi-banner');
+  if (tsiEl) {
+    tsiEl.className = 'detect-banner ' + (
+      status==='ACTIVE'   ? 'db-active'   :
+      status==='PROBABLE' ? 'db-probable' :
+      status==='POSSIBLE' ? 'db-probable' : 'db-quiet'
+    );
+  }
+  const tsiIcon = document.getElementById('tsi-icon');
+  if (tsiIcon) tsiIcon.textContent = icons[status] || '⚪';
+  const tsiTitle = document.getElementById('tsi-status-title');
+  if (tsiTitle) tsiTitle.textContent =
+    `TSI STATUS: ${status}  (Activity score ${score}/13)`;
+  const tsiBody = document.getElementById('tsi-status-body');
+  if (tsiBody) tsiBody.innerHTML = [
+    el.beam_flag ? '✓ Electron beam detected' : '✗ No beam',
+    holes.n_detected > 0 ? `✓ ${holes.n_detected} electron holes` : '✗ No electron holes',
+    lang.active ? '✓ Langmuir waves active' : '✗ Langmuir quiet',
+    chain.detected ? '✓ TSI→Weibel chain detected' : '✗ Chain not detected',
+    el.anisotropy_A > 0.05 ? `✓ Anisotropy A=${el.anisotropy_A?.toFixed(3)}` : '✗ Low anisotropy',
+  ].join('  |  ');
+
+  // ── Overview KPIs ──────────────────────────────────────────────────────────
+  const kpiEl = document.getElementById('obs-kpis');
+  if (kpiEl) kpiEl.innerHTML = [
+    kpi(fgm.B_mean_nT  ? fgm.B_mean_nT+'<small> nT</small>'  : null,
+        'Mean |B| (FGM)', 'Magnetic field strength', 'c-i'),
+    kpi(el.Ne_mean_cc  ? el.Ne_mean_cc+'<small> cm⁻³</small>' : null,
+        'Electron density n_e', 'FPI-DES fast survey', 'c-g'),
+    kpi(el.fpe_kHz     ? el.fpe_kHz+'<small> kHz</small>'    : null,
+        'Plasma frequency f_pe', '= 8980 × √(n_e)', 'c-a'),
+    kpi(el.Ve_mean_kms ? el.Ve_mean_kms+'<small> km/s</small>': null,
+        'Electron bulk speed |V_e|', 'FPI-DES bulk velocity', el.beam_flag?'c-pk':'c-m'),
+    kpi(el.Tratio_mean ?? null,
+        'T_perp / T_par', '> 1 = Weibel active; < 1 = firehose', 'c-a'),
+    kpi(fgm.spectral_index ?? null,
+        'Turbulence α (B PSD)', 'Kolmogorov = −1.667; IK = −1.500', 'c-p'),
+    kpi(der.alfven_speed_kms ? der.alfven_speed_kms+'<small> km/s</small>' : null,
+        'Alfvén speed v_A', '= 21.8 × B / √(n_i)', 'c-i'),
+    kpi(der.plasma_beta ?? null,
+        'Plasma beta β_e', 'Thermal / magnetic pressure ratio', 'c-g'),
+  ].join('');
+
+  // ── Instrument status pills ────────────────────────────────────────────────
+  const instEl = document.getElementById('inst-status');
+  if (instEl) instEl.innerHTML = [
+    fgm.n_points ? pill(`✓ FGM: ${fgm.n_points} pts`, 'ok') : pill('✗ FGM: no data', 'bad'),
+    edp.n_points ? pill(`✓ EDP: ${edp.n_points} pts`, 'ok') : pill('✗ EDP: no data', 'bad'),
+    el.Ne_mean_cc ? pill(`✓ FPI-DES: ${el.Ne_mean_cc} cm⁻³`, 'ok') : pill('✗ FPI-DES: no data', 'bad'),
+    ions.Ni_mean_cc ? pill(`✓ FPI-DIS: ${ions.Ni_mean_cc} cm⁻³`, 'ok') : pill('✗ FPI-DIS: no data', 'bad'),
+    pill(`Score: ${score}/13`, score>=7?'ok':score>=4?'warn':'dim'),
+  ].join('');
+
+  // ── Parameter table ────────────────────────────────────────────────────────
+  const ptEl = document.getElementById('param-table');
+  if (ptEl) ptEl.innerHTML = `<tr><th>Parameter</th><th>Value</th><th>Significance for TSI</th></tr>` + [
+    ['|B| mean', fgm.B_mean_nT ? fgm.B_mean_nT+' nT' : '—', 'Background field strength. High B suppresses Langmuir waves (ω_ce > ω_pe).'],
+    ['B spectral index α', fgm.spectral_index ?? '—', 'Turbulence cascade regime. Kolmogorov=−1.667, IK=−1.500, steeper=enhanced dissipation.'],
+    ['n_e (electrons)', el.Ne_mean_cc ? el.Ne_mean_cc+' cm⁻³' : '—', 'Determines ω_pe and thus TSI growth timescale. Higher n_e → faster growth.'],
+    ['f_pe', el.fpe_kHz ? el.fpe_kHz+' kHz' : '—', 'Plasma frequency. Langmuir waves oscillate at exactly f_pe.'],
+    ['V_e bulk speed', el.Ve_mean_kms ? el.Ve_mean_kms+' km/s' : '—', 'Used as beam velocity v₀ in theory. TSI requires v₀ ≠ 0.'],
+    ['T_par (electrons)', el.Tpar_mean_eV ? el.Tpar_mean_eV+' eV' : '—', 'Parallel thermal speed sets v_th. TSI needs v_beam >> v_th.'],
+    ['T_perp (electrons)', el.Tperp_mean_eV ? el.Tperp_mean_eV+' eV' : '—', 'Perpendicular temperature drives Weibel when T_perp > T_par.'],
+    ['T_perp/T_par ratio', el.Tratio_mean ?? '—', 'Anisotropy ratio. > 1 = Weibel active. = 1 = isotropic. < 1 = firehose.'],
+    ['Anisotropy A', el.anisotropy_A ?? '—', 'A = T_perp/T_par − 1. TSI→Weibel chain requires A > 0.05 after beam event.'],
+    ['v_beam/v_thermal', el.dfdv_proxy ?? '—', 'Bump-on-tail proxy. >> 1 = df/dv > 0 at v_phase (classical TSI condition).'],
+    ['Debye length λ_D', el.debye_length_m ? el.debye_length_m+' m' : '—', 'Electron hole size ~ 3–20 λ_D. Spatial scale of TSI saturation structures.'],
+    ['Plasma beta β_e', der.plasma_beta ?? '—', 'β < 1 → magnetic pressure dominates. β > 1 → thermal pressure dominates. Affects saturation level.'],
+    ['Alfvén speed v_A', der.alfven_speed_kms ? der.alfven_speed_kms+' km/s' : '—', 'Reference speed. V_e >> v_A confirms beam-plasma not Alfvénic regime.'],
+    ['n_i (ions)', ions.Ni_mean_cc ? ions.Ni_mean_cc+' cm⁻³' : '—', 'Quasi-neutrality check: should equal n_e. Mobile ions → multi-species equations.'],
+    ['Electron holes', holes.n_detected ?? 0, 'Direct evidence of TSI nonlinear saturation phase.'],
+  ].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="font-family:'Exo 2',sans-serif;font-size:.87rem;color:var(--muted);">${r[2]}</td></tr>`).join('');
+
+  // ── Status pills in overview ────────────────────────────────────────────────
+  const pillEl = document.getElementById('obs-pills');
+  if (pillEl) pillEl.innerHTML = [
+    el.beam_flag ? pill('⚡ BEAM DETECTED','warn') : pill('No beam','dim'),
+    holes.n_detected > 5 ? pill(`🕳 ${holes.n_detected} Electron Holes`,'ok') :
+      holes.n_detected > 0 ? pill(`${holes.n_detected} Possible Holes`,'warn') :
+      pill('No holes','dim'),
+    lang.active ? pill('🌊 Langmuir Active','ok') : pill('Langmuir quiet','dim'),
+    chain.detected ? pill('🔗 TSI→Weibel Chain','info') : pill('Chain not detected','dim'),
+    (el.anisotropy_A||0) > 0.1 ? pill(`🧲 Weibel A=${el.anisotropy_A?.toFixed(3)}`,'warn') : pill('Low anisotropy','dim'),
+  ].join('');
+
+  const notesEl = document.getElementById('obs-notes');
+  if (notesEl) notesEl.innerHTML = [
+    el.beam_note ? `<p style="font-size:.88rem;color:#8fb5c8;margin-bottom:6px;">⚡ ${el.beam_note}</p>` : '',
+    el.dfdv_note ? `<p style="font-size:.88rem;color:#8fb5c8;margin-bottom:6px;">📐 ${el.dfdv_note}</p>` : '',
+    el.weibel_susceptibility ? `<p style="font-size:.88rem;color:#8fb5c8;margin-bottom:6px;">🧲 ${el.weibel_susceptibility}</p>` : '',
+    holes.note ? `<p style="font-size:.88rem;color:#8fb5c8;margin-bottom:6px;">🕳 ${holes.note}</p>` : '',
+  ].join('');
+
+  // ── B field time series ─────────────────────────────────────────────────────
+  if ((fgm.Bmag||[]).length) {
+    Plotly.react('obs-b-plot', [{
+      y:fgm.Bmag, mode:'lines', name:`|B| (nT)  α=${fgm.spectral_index}`,
+      line:{color:'#00d4ff',width:1.5},
+      fill:'tozeroy', fillcolor:'rgba(0,212,255,0.05)'
+    }], pLay({
+      xaxis:{...PLY.xaxis,title:'Sample index (subsampled from 8 sps survey)'},
+      yaxis:{...PLY.yaxis,title:'|B| (nT)'},
+      title:{text:`Magnetic Field Magnitude — MMS-1 FGM  |  Mean = ${fgm.B_mean_nT} nT  |  α = ${fgm.spectral_index}`,font:{color:'#c8dde8',size:13}},
+    }), CFG);
+  }
+
+  if ((fgm.Bx||[]).length && (fgm.By||[]).length && (fgm.Bz||[]).length) {
+    Plotly.react('obs-bxyz-plot', [
+      {y:fgm.Bx,mode:'lines',name:'Bx (GSE)',line:{color:'#ff9f1c',width:1.2}},
+      {y:fgm.By,mode:'lines',name:'By (GSE)',line:{color:'#39ff14',width:1.2}},
+      {y:fgm.Bz,mode:'lines',name:'Bz (GSE)',line:{color:'#00d4ff',width:1.2}},
+    ], pLay({
+      xaxis:{...PLY.xaxis,title:'Sample index'},
+      yaxis:{...PLY.yaxis,title:'B (nT)'},
+    }), CFG);
+  }
+
+  if ((fgm.psd_freq||[]).length) {
+    const freqs = fgm.psd_freq; const psds = fgm.psd_vals;
+    const ref_f = freqs.slice(20,80);
+    const ref_psd0 = psds[20];
+    Plotly.react('obs-bpsd-plot', [
+      {x:freqs, y:psds, mode:'lines', name:'B PSD (nT²/Hz)',
+       line:{color:'#00d4ff',width:2}},
+      {x:ref_f, y:ref_f.map(f=>ref_psd0*Math.pow(f/freqs[20],-5/3)), mode:'lines',
+       name:'Kolmogorov −5/3', line:{color:'#ff9f1c',width:1.5,dash:'dot'}},
+      {x:ref_f, y:ref_f.map(f=>ref_psd0*Math.pow(f/freqs[20],-1.5)), mode:'lines',
+       name:'IK −3/2', line:{color:'#b06cff',width:1.5,dash:'dash'}},
+    ], pLay({
+      xaxis:{...PLY.xaxis,type:'log',title:'Frequency (Hz)'},
+      yaxis:{...PLY.yaxis,type:'log',title:'PSD (nT²/Hz)'},
+      title:{text:`B Power Spectrum  |  Measured α = ${fgm.spectral_index}`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+
+  // ── Theory validation ───────────────────────────────────────────────────────
+  const tiEl = document.getElementById('theory-insight-text');
+  if (tiEl) tiEl.innerHTML = theory.available ?
+    (theory.validation_note || 'Theory analysis complete.') :
+    (theory.note || 'Theory validation unavailable.');
+
+  if (theory.available && theory.input_parameters) {
+    const ip = theory.input_parameters;
+    const tikEl = document.getElementById('theory-input-kpis');
+    if (tikEl) tikEl.innerHTML = [
+      kpi(ip.v0_over_c ? ip.v0_over_c.toFixed(5) : null, 'v₀/c (beam velocity)', '= V_e / c. Input to all 4 equations.', 'c-a'),
+      kpi(ip.lorentz_g0 ? ip.lorentz_g0.toFixed(4) : null, 'Lorentz factor γ₀', '= 1/√(1−v₀²). Enters Eq.19 and 21.', 'c-i'),
+      kpi(ip.k_resonance ? ip.k_resonance.toFixed(3) : null, 'k_res = ω_pe/v₀', 'Resonant wavenumber — beam-wave resonance.', 'c-p'),
+      kpi(ip.fpe_kHz ? ip.fpe_kHz+' kHz' : null, 'f_pe', 'Sets absolute timescale: τ = 1/(γ × ω_pe).', 'c-g'),
+      kpi(ip.plasma_beta ?? null, 'Plasma beta β', 'Low β → magnetic-dominated, favours TSI.', 'c-a'),
+      kpi(ip.alfven_speed_kms ? ip.alfven_speed_kms+' km/s' : null, 'Alfvén speed v_A', 'V_e >> v_A confirms beam-plasma regime.', 'c-i'),
+    ].join('');
+  }
+
+  // Theory curves grid
+  const tcGrid = document.getElementById('theory-curves-grid');
+  const tcConfigs = [
+    {key:'eq18_nr_single',label:'Eq.(18) — Non-relativistic Single-species',cls:'tc-eq18',color:'#ff9f1c'},
+    {key:'eq19_rel_single',label:'Eq.(19) — Relativistic Single-species',    cls:'tc-eq19',color:'#00d4ff'},
+    {key:'eq20_nr_multi',  label:'Eq.(20) — Non-relativistic Multi-species', cls:'tc-eq20',color:'#39ff14'},
+    {key:'eq21_rel_multi', label:'Eq.(21) — Relativistic Multi-species',     cls:'tc-eq21',color:'#b06cff'},
+  ];
+  if (tcGrid && theory.theory_curves) {
+    tcGrid.innerHTML = tcConfigs.map(tc => {
+      const curve = theory.theory_curves[tc.key] || {};
+      const gmax  = curve.max_growth_rate_normalised;
+      const kmax  = curve.k_at_max;
+      const efold = curve.efolding_time_ms;
+      return `<div class="theory-card ${tc.cls}">
+        <div class="theory-title">${tc.label}</div>
+        <div class="theory-result" style="color:${gmax>0?'var(--phosphor)':'var(--muted)'}">
+          γ_max = ${gmax?.toFixed(6) ?? '—'} ωₚ
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--amber);margin:4px 0;">
+          k_max = ${kmax?.toFixed(4) ?? '—'} ωₚ/c
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--muted);">
+          e-folding time: ${efold ? efold.toFixed(3)+' ms' : '—'}<br>
+          Physical: γ_phys = ${gmax ? (gmax*(2*Math.PI*(el.fpe_kHz||0)*1e3)).toFixed(0)+' rad/s' : '—'}
+        </div>
+        <div id="theory-mini-${tc.key}" style="margin-top:10px;height:200px;"></div>
+      </div>`;
+    }).join('');
+
+    // Mini plots
+    tcConfigs.forEach(tc => {
+      const curve = theory.theory_curves[tc.key];
+      if (!curve || !curve.growth_curve_k?.length) return;
+      const kres = theory.input_parameters?.k_resonance;
+      const traces = [{
+        x: curve.growth_curve_k, y: curve.growth_curve_gr,
+        mode:'lines', name:'γ(k)', line:{color:tc.color,width:2}
+      }];
+      if (kres) traces.push({
+        x:[kres,kres], y:[0, Math.max(...curve.growth_curve_gr)*1.1],
+        mode:'lines', name:'k_res', line:{color:'#ff3e9d',width:1.5,dash:'dot'},
+        showlegend:false
+      });
+      Plotly.react(`theory-mini-${tc.key}`, traces, {
+        paper_bgcolor:'#030609',plot_bgcolor:'#07101a',
+        margin:{t:5,b:30,l:50,r:5},
+        font:{color:'#c8dde8',family:'Share Tech Mono',size:10},
+        xaxis:{color:'#4a6578',gridcolor:'#0a1826',title:'k'},
+        yaxis:{color:'#4a6578',gridcolor:'#0a1826',title:'γ [ωₚ]'},
+        showlegend:false,hovermode:'closest'
+      }, {responsive:true,displaylogo:false});
+    });
+
+    // Overlay plot
+    if (theory.theory_curves) {
+      const overlayTraces = tcConfigs.map(tc => {
+        const curve = theory.theory_curves[tc.key];
+        if (!curve) return null;
+        return {x:curve.growth_curve_k, y:curve.growth_curve_gr,
+                mode:'lines', name:tc.label.replace('— ',''),
+                line:{color:tc.color,width:2.5}};
+      }).filter(Boolean);
+      const kres = theory.input_parameters?.k_resonance;
+      if (kres) {
+        const maxGr = Math.max(...tcConfigs.map(tc => {
+          const c = theory.theory_curves[tc.key];
+          return c ? Math.max(...c.growth_curve_gr) : 0;
+        }));
+        overlayTraces.push({
+          x:[kres,kres],y:[0,maxGr*1.1],mode:'lines',name:'k_resonance',
+          line:{color:'#ff3e9d',width:2,dash:'dot'}
+        });
+      }
+      Plotly.react('theory-overlay-plot', overlayTraces, pLay({
+        xaxis:{...PLY.xaxis,title:'k  [ωₚ/c]'},
+        yaxis:{...PLY.yaxis,title:'Im(γ)  [ωₚ]'},
+        title:{text:`Theory Predictions — v₀/c = ${theory.input_parameters?.v0_over_c?.toFixed(5)||'?'}  |  f_pe = ${el.fpe_kHz||'?'} kHz`,font:{color:'#c8dde8',size:13}},
+      }), CFG);
+    }
+  }
+
+  // ── Electron holes ──────────────────────────────────────────────────────────
+  const nh = holes.n_detected || 0;
+  setBanner('holes-banner', 'holes-icon', 'holes-title', 'holes-body',
+    nh>5 ? 'active' : nh>0 ? 'probable' : 'quiet',
+    nh>5 ? '🕳' : nh>0 ? '🔎' : '😶',
+    `${nh > 5 ? 'ELECTRON HOLES CONFIRMED' : nh > 0 ? 'POSSIBLE ELECTRON HOLES' : 'NO ELECTRON HOLES DETECTED'}  (${nh} events)`,
+    holes.note || ''
+  );
+
+  const hkEl = document.getElementById('holes-kpis');
+  if (hkEl) hkEl.innerHTML = [
+    kpi(nh, 'Bipolar E∥ events', 'Above 3×median(|E∥|) threshold', nh>5?'c-g':'c-m'),
+    kpi(edp.bipolar_threshold_mVm ? edp.bipolar_threshold_mVm+' mV/m' : null, 'Detection threshold', '3 × median(|E∥|)', 'c-a'),
+    kpi(edp.Epar_std_mVm ? edp.Epar_std_mVm+' mV/m' : null, 'E∥ RMS amplitude', 'Standard deviation of Ez', 'c-i'),
+    kpi(edp.E_mean_mVm ? edp.E_mean_mVm+' mV/m' : null, 'Mean |E| field', 'Background wave activity level', 'c-m'),
+  ].join('');
+
+  if ((edp.Epar_series||[]).length) {
+    const thr = edp.bipolar_threshold_mVm || 0;
+    Plotly.react('holes-epar-plot', [
+      {y:edp.Epar_series,mode:'lines',name:'E∥ = Ez (mV/m)',
+       line:{color:'#39ff14',width:1},fill:'tozeroy',fillcolor:'rgba(57,255,20,0.04)'},
+      {y:edp.Epar_series.map(()=>thr),mode:'lines',name:`+threshold (${thr} mV/m)`,
+       line:{color:'#ff9f1c',width:1.2,dash:'dot'}},
+      {y:edp.Epar_series.map(()=>-thr),mode:'lines',name:`−threshold`,
+       line:{color:'#ff9f1c',width:1.2,dash:'dot'},showlegend:false},
+    ], pLay({
+      xaxis:{...PLY.xaxis,title:'Sample index (subsampled from 32 sps)'},
+      yaxis:{...PLY.yaxis,title:'E∥ (mV/m)'},
+      title:{text:`Parallel Electric Field — Electron Hole Detector  |  ${nh} bipolar events`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+
+  if ((edp.Emag_series||[]).length) {
+    Plotly.react('holes-emag-plot', [{
+      y:edp.Emag_series,mode:'lines',name:'|E| (mV/m)',
+      line:{color:'#b06cff',width:1.5}
+    }], pLay({
+      xaxis:{...PLY.xaxis,title:'Sample index'},
+      yaxis:{...PLY.yaxis,title:'|E| (mV/m)'},
+      title:{text:`Total Electric Field Magnitude  |  Mean = ${edp.E_mean_mVm} mV/m`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+
+  const hetEl = document.getElementById('holes-event-table');
+  if (hetEl) {
+    const evts = holes.events || [];
+    hetEl.innerHTML = evts.length ?
+      `<table class="param-table">
+        <tr><th>#</th><th>E_max (mV/m)</th><th>Duration (ms)</th><th>Classification</th></tr>
+        ${evts.map((e,i)=>`<tr>
+          <td>${i+1}</td>
+          <td style="color:var(--amber);font-size:1rem;">${e.E_max_mVm}</td>
+          <td>${e.duration_ms}</td>
+          <td style="font-family:'Exo 2',sans-serif;color:var(--muted);font-size:.87rem;">${
+            e.duration_ms < 5 ? 'Sub-Debye electron hole' :
+            e.duration_ms < 50 ? 'Electron hole / BGK mode' :
+            'Broad bipolar event / solitary wave'
+          }</td>
+        </tr>`).join('')}
+      </table>` :
+      `<div style="color:var(--muted);font-family:'Share Tech Mono',monospace;padding:16px;">No bipolar events detected in this window.</div>`;
+  }
+
+  // ── Beam analysis ───────────────────────────────────────────────────────────
+  const beam_flag = el.beam_flag || false;
+  setBanner('beam-banner', null, 'beam-title', 'beam-body',
+    beam_flag ? 'active' : 'quiet',
+    null,
+    beam_flag ? `ELECTRON BEAM DETECTED — V_e = ${el.Ve_mean_kms} km/s` : `NO BEAM — V_e = ${el.Ve_mean_kms||'?'} km/s`,
+    (el.beam_note||'') + '<br>' + (el.dfdv_note||'')
+  );
+
+  const bkEl = document.getElementById('beam-kpis');
+  if (bkEl) bkEl.innerHTML = [
+    kpi(el.Ve_mean_kms ? el.Ve_mean_kms+' km/s' : null, 'Mean |V_e|', 'Threshold: 300 km/s', beam_flag?'c-a':'c-m'),
+    kpi(el.Ve_max_kms  ? el.Ve_max_kms+' km/s'  : null, 'Peak |V_e|', 'Maximum in this 6h window', 'c-a'),
+    kpi(el.vth_par_kms ? el.vth_par_kms+' km/s' : null, 'Thermal speed v_th', '= √(2 T_par / m_e)', 'c-i'),
+    kpi(el.dfdv_proxy  ? el.dfdv_proxy.toFixed(3) : null, 'v_beam / v_thermal', '>> 1 = bump-on-tail; < 1.5 = no bump', (el.dfdv_proxy||0)>3?'c-g':(el.dfdv_proxy||0)>1.5?'c-a':'c-pk'),
+    kpi(el.fpe_kHz ? el.fpe_kHz+' kHz' : null, 'Plasma frequency f_pe', '= 8980 × √(n_e)', 'c-g'),
+    kpi(el.Tpar_mean_eV ? el.Tpar_mean_eV+' eV' : null, 'T_par (electrons)', 'Parallel electron temperature', 'c-i'),
+  ].join('');
+
+  if ((el.Ve_series||[]).length) {
+    Plotly.react('beam-ve-plot', [
+      {y:el.Ve_series,mode:'lines',name:'|V_e| (km/s)',
+       line:{color:'#ff9f1c',width:1.5},fill:'tozeroy',fillcolor:'rgba(255,159,28,0.05)'},
+      {y:el.Ve_series.map(()=>300),mode:'lines',name:'Beam threshold 300 km/s',
+       line:{color:'#ff3e9d',width:1.5,dash:'dash'}},
+    ], pLay({
+      xaxis:{...PLY.xaxis,title:'Sample index (subsampled)'},
+      yaxis:{...PLY.yaxis,title:'|V_e| (km/s)'},
+      title:{text:`Electron Bulk Speed  |  Mean = ${el.Ve_mean_kms} km/s  |  Beam: ${beam_flag?'DETECTED':'NOT DETECTED'}`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+
+  if ((el.Ne_series||[]).length) {
+    const fpe_arr = el.Ne_series.map(n => n > 0 ? 8.980*Math.sqrt(n) : null);
+    Plotly.react('beam-ne-plot', [
+      {y:el.Ne_series,mode:'lines',name:'n_e (cm⁻³)',
+       line:{color:'#39ff14',width:1.5},yaxis:'y'},
+      {y:fpe_arr,mode:'lines',name:'f_pe (kHz)',
+       line:{color:'#00d4ff',width:1.5,dash:'dot'},yaxis:'y2'},
+    ], pLay({
+      xaxis:{...PLY.xaxis,title:'Sample index'},
+      yaxis:{...PLY.yaxis,title:'n_e (cm⁻³)'},
+      yaxis2:{...PLY.yaxis,overlaying:'y',side:'right',title:'f_pe (kHz)',color:'#00d4ff'},
+    }), CFG);
+  }
+
+  const brtEl = document.getElementById('beam-resonance-table');
+  if (brtEl && el.Ve_mean_kms) brtEl.innerHTML = `<tr><th>Quantity</th><th>Value</th><th>Interpretation</th></tr>` + [
+    ['V_e (mean)', el.Ve_mean_kms+' km/s', 'Electron bulk speed — the beam velocity v₀ = V_e/c'],
+    ['v_thermal (T_par)', el.vth_par_kms ? el.vth_par_kms+' km/s' : '—', '√(2 T_par/m_e) — width of velocity distribution'],
+    ['v_beam/v_thermal', el.dfdv_proxy ? el.dfdv_proxy.toFixed(4) : '—', '>> 1 = classical bump-on-tail; ≈ 1 = truncated distribution (Jebaraj+2025)'],
+    ['Resonant k', theory.input_parameters?.k_resonance ? theory.input_parameters.k_resonance.toFixed(4)+' ωₚ/c' : '—', 'k_res = ω_pe/v₀ — wave resonant with beam'],
+    ['f_pe', el.fpe_kHz ? el.fpe_kHz+' kHz' : '—', '8980 × √(n_e) — Langmuir wave oscillation frequency'],
+    ['T_par', el.Tpar_mean_eV ? el.Tpar_mean_eV+' eV' : '—', 'Electron parallel temperature'],
+    ['T_perp', el.Tperp_mean_eV ? el.Tperp_mean_eV+' eV' : '—', 'Electron perpendicular temperature'],
+    ['Beam classification', beam_flag ? 'BEAM DETECTED' : 'NOT DETECTED', 'Based on V_e > 300 km/s threshold'],
+  ].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="font-family:'Exo 2',sans-serif;font-size:.87rem;color:var(--muted);">${r[2]}</td></tr>`).join('');
+
+  // ── TSI→Weibel chain ────────────────────────────────────────────────────────
+  setBanner('chain-banner', null, 'chain-title', 'chain-body',
+    chain.detected ? 'active' : (el.anisotropy_A||0)>0.05 ? 'probable' : 'quiet',
+    null,
+    chain.detected ? 'TSI → WEIBEL CHAIN DETECTED' : 'CHAIN NOT DETECTED',
+    chain.note || ''
+  );
+
+  const ckEl = document.getElementById('chain-kpis');
+  if (ckEl) {
+    const A = el.anisotropy_A || 0;
+    ckEl.innerHTML = [
+      kpi(A ? A.toFixed(4) : null, 'Anisotropy A = T⊥/T∥ − 1', 'A > 0 = Weibel active; A < 0 = firehose', A>0.1?'c-a':A>0?'c-g':'c-m'),
+      kpi(el.Tratio_mean ?? null, 'T_perp/T_par ratio', 'Stability boundary at 1.0', 'c-a'),
+      kpi(el.weibel_gamma_over_wp ?? null, 'γ_Weibel / ω_p', '= √(A/(1+A)) × v_th⊥/c', 'c-p'),
+      kpi(chain.peak_correlation ?? null, 'Cross-corr peak C(τ)', '> 0.2 at positive lag = chain present', chain.detected?'c-g':'c-m'),
+      kpi(chain.peak_lag_samples ?? null, 'Lag at peak (samples)', '> 0 = T⊥/T∥ lags V_e (correct causal order)', 'c-i'),
+    ].join('');
+  }
+
+  if ((el.Tpar_series||[]).length && (el.Tperp_series||[]).length) {
+    Plotly.react('chain-t-plot', [
+      {y:el.Tpar_series,mode:'lines',name:'T_par (eV)',line:{color:'#00d4ff',width:1.8}},
+      {y:el.Tperp_series,mode:'lines',name:'T_perp (eV)',line:{color:'#ff9f1c',width:1.8}},
+    ], pLay({
+      xaxis:{...PLY.xaxis,title:'Sample index'},
+      yaxis:{...PLY.yaxis,title:'Temperature (eV)'},
+      title:{text:`Electron Temperatures  |  T_par=${el.Tpar_mean_eV} eV  |  T_perp=${el.Tperp_mean_eV} eV`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+
+  if ((el.Tratio_series||[]).length) {
+    Plotly.react('chain-ratio-plot', [
+      {y:el.Tratio_series,mode:'lines',name:'T_perp/T_par',
+       line:{color:'#b06cff',width:2},fill:'tozeroy',fillcolor:'rgba(176,108,255,0.05)'},
+      {y:el.Tratio_series.map(()=>1.0),mode:'lines',name:'Stability boundary (= 1)',
+       line:{color:'#ff3e9d',width:1.5,dash:'dash'}},
+    ], pLay({
+      xaxis:{...PLY.xaxis,title:'Sample index'},
+      yaxis:{...PLY.yaxis,title:'T_perp / T_par'},
+      title:{text:`Temperature Anisotropy  |  Mean ratio = ${el.Tratio_mean}  |  A = ${el.anisotropy_A}`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+
+  if ((chain.xcorr||[]).length) {
+    const lags = chain.xcorr.map((_,i)=>i);
+    Plotly.react('chain-xcorr-plot', [
+      {x:lags,y:chain.xcorr,mode:'lines+markers',name:'C(τ) — V_e vs T⊥/T∥',
+       line:{color:'#39ff14',width:2.5},marker:{size:6,color:'#39ff14'}},
+      {x:lags,y:lags.map(()=>0.2),mode:'lines',name:'Detection threshold (0.2)',
+       line:{color:'#ff9f1c',width:1.5,dash:'dot'}},
+      {x:lags,y:lags.map(()=>0),mode:'lines',name:'Zero line',
+       line:{color:'#4a6578',width:1}},
+    ], pLay({
+      xaxis:{...PLY.xaxis,title:'Lag τ (samples of ~4.5 s)'},
+      yaxis:{...PLY.yaxis,title:'Normalised cross-correlation C(τ)'},
+      title:{text:`Causal Chain Test  |  Peak at τ=${chain.peak_lag_samples}, C=${chain.peak_correlation}  |  Chain: ${chain.detected?'DETECTED':'NOT DETECTED'}`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+
+  // ── Langmuir ────────────────────────────────────────────────────────────────
+  setBanner('langmuir-banner', null, 'langmuir-title', 'langmuir-body',
+    lang.active ? 'active' : 'quiet', null,
+    lang.active ? `LANGMUIR WAVES DETECTED — R = ${lang.enhancement_ratio}×` : 'NO LANGMUIR ENHANCEMENT',
+    lang.note || ''
+  );
+
+  const lkEl = document.getElementById('langmuir-kpis');
+  if (lkEl) lkEl.innerHTML = [
+    kpi(lang.fpe_kHz ? lang.fpe_kHz+' kHz' : null, 'Plasma frequency f_pe', '= 8980 × √(n_e)', 'c-a'),
+    kpi(lang.enhancement_ratio ?? null, 'PSD enhancement ratio R', '> 3 = Langmuir active', lang.active?'c-g':'c-m'),
+    kpi(lang.E_at_fpe ? lang.E_at_fpe.toExponential(2)+' mV²/m²/Hz' : null, 'PSD at f_pe band', '', 'c-i'),
+    kpi(lang.E_background ? lang.E_background.toExponential(2)+' mV²/m²/Hz' : null, 'Background PSD', '0.5–0.7 × f_pe', 'c-m'),
+  ].join('');
+
+  const lpsd = edp.langmuir_psd || {};
+  if ((lpsd.freq_Hz||[]).length) {
+    const fpe_mark = lang.fpe_Hz;
+    const maxPSD = Math.max(...lpsd.PSD_mVm2_Hz.filter(v=>v>0));
+    const minPSD = Math.min(...lpsd.PSD_mVm2_Hz.filter(v=>v>0));
+    Plotly.react('langmuir-psd-plot', [
+      {x:lpsd.freq_Hz,y:lpsd.PSD_mVm2_Hz,mode:'lines',name:'E-field PSD (mV²/m²/Hz)',
+       line:{color:'#39ff14',width:1.8}},
+      ...(fpe_mark ? [{x:[fpe_mark,fpe_mark],y:[minPSD,maxPSD],mode:'lines',
+                       name:`f_pe = ${lang.fpe_kHz} kHz`,
+                       line:{color:'#ff9f1c',width:2.5,dash:'dot'}}] : [])
+    ], pLay({
+      xaxis:{...PLY.xaxis,type:'log',title:'Frequency (Hz)'},
+      yaxis:{...PLY.yaxis,type:'log',title:'PSD (mV²/m²/Hz)'},
+      title:{text:`E-field Power Spectrum  |  f_pe = ${lang.fpe_kHz} kHz  |  Enhancement: ${lang.enhancement_ratio}×`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+
+  if ((fgm.psd_freq||[]).length) {
+    const freqs=fgm.psd_freq; const psds=fgm.psd_vals; const psd0=psds[20]; const f0=freqs[20];
+    Plotly.react('langmuir-bpsd-plot', [
+      {x:freqs,y:psds,mode:'lines',name:`B PSD (nT²/Hz)  α=${fgm.spectral_index}`,line:{color:'#00d4ff',width:2}},
+      {x:freqs.slice(20,80),y:freqs.slice(20,80).map(f=>psd0*Math.pow(f/f0,-5/3)),mode:'lines',
+       name:'Kolmogorov −5/3',line:{color:'#ff9f1c',width:1.5,dash:'dot'}},
+      {x:freqs.slice(20,80),y:freqs.slice(20,80).map(f=>psd0*Math.pow(f/f0,-1.5)),mode:'lines',
+       name:'IK −3/2',line:{color:'#b06cff',width:1.5,dash:'dash'}},
+    ], pLay({
+      xaxis:{...PLY.xaxis,type:'log',title:'Frequency (Hz)'},
+      yaxis:{...PLY.yaxis,type:'log',title:'PSD (nT²/Hz)'},
+      title:{text:`B-field Turbulence  |  α = ${fgm.spectral_index}  |  ${fgm.turbulence_regime||''}`,font:{color:'#c8dde8',size:12}},
+    }), CFG);
+  }
+}
+
+// ── RENDER HISTORY ─────────────────────────────────────────────────────────
+async function renderHistory() {
+  const d = await loadJSON('results/mms_history.json');
+  if (!d || !d.records || d.records.length === 0) return;
+  const recs = d.records;
+
+  const spEl = document.getElementById('hist-summary-pills');
+  if (spEl) spEl.innerHTML = [
+    pill(`${recs.length} records (~${Math.round(recs.length*6/24)} days)`, 'info'),
+    pill(`${recs.filter(r=>r.beam).length} beam events`, 'warn'),
+    pill(`${recs.filter(r=>r.n_holes>0).length} hole windows`, 'ok'),
+    pill(`${recs.filter(r=>r.tsi_status==='ACTIVE').length} ACTIVE windows`, 'bad'),
+  ].join('');
+
+  const labels = recs.map(r => (r.data_utc||r.utc||'').slice(0,13));
+
+  function histPlot(id, traces, yTitle, titleStr) {
+    Plotly.react(id, traces, pLay({
+      xaxis:{...PLY.xaxis,title:'Date/Time (UTC)',tickangle:-30,nticks:10},
+      yaxis:{...PLY.yaxis,title:yTitle},
+      margin:{t:30,b:70,l:65,r:20},
+      title:{text:titleStr,font:{color:'#c8dde8',size:11}},
+    }), CFG);
+  }
+
+  histPlot('hist-b-plot',[
+    {x:labels,y:recs.map(r=>r.B_mean_nT),mode:'lines+markers',name:'|B| (nT)',
+     line:{color:'#00d4ff',width:1.5},marker:{size:3,color:'#00d4ff'}}
+  ], '|B| (nT)', 'Mean Magnetic Field Strength');
+
+  histPlot('hist-alpha-plot',[
+    {x:labels,y:recs.map(r=>r.B_alpha),mode:'lines+markers',name:'α (measured)',
+     line:{color:'#ff3e9d',width:1.5},marker:{size:3}},
+    {x:labels,y:recs.map(()=>-5/3),mode:'lines',name:'Kolmogorov −1.667',
+     line:{color:'#ff9f1c',width:1.2,dash:'dot'}},
+    {x:labels,y:recs.map(()=>-1.5),mode:'lines',name:'IK −1.500',
+     line:{color:'#b06cff',width:1.2,dash:'dash'}},
+  ], 'Spectral index α', 'Turbulence Spectral Index');
+
+  histPlot('hist-ve-plot',[
+    {x:labels,y:recs.map(r=>r.Ve_kms),mode:'lines+markers',name:'|V_e| (km/s)',
+     line:{color:'#ff9f1c',width:1.5},marker:{size:3,color:recs.map(r=>r.beam?'#ff3e9d':'#ff9f1c')}},
+    {x:labels,y:recs.map(()=>300),mode:'lines',name:'Beam threshold 300 km/s',
+     line:{color:'#ff3e9d',width:1.5,dash:'dash'}},
+  ], '|V_e| (km/s)', 'Electron Bulk Speed — Beam Monitor');
+
+  histPlot('hist-aniso-plot',[
+    {x:labels,y:recs.map(r=>r.A),mode:'lines+markers',name:'A = T⊥/T∥ − 1',
+     line:{color:'#b06cff',width:1.5},marker:{size:3},
+     fill:'tozeroy',fillcolor:'rgba(176,108,255,0.06)'},
+    {x:labels,y:recs.map(()=>0),mode:'lines',name:'A = 0 boundary',
+     line:{color:'#ff3e9d',width:1.5,dash:'dash'}},
+  ], 'Anisotropy A', 'Temperature Anisotropy — Weibel Drive');
+
+  histPlot('hist-holes-plot',[
+    {x:labels,y:recs.map(r=>r.n_holes||0),type:'bar',name:'Electron holes / window',
+     marker:{color:recs.map(r=>(r.n_holes||0)>=10?'rgba(255,62,157,0.7)':(r.n_holes||0)>0?'rgba(57,255,20,0.6)':'rgba(74,101,120,0.4)'),
+             line:{color:'#1a4060',width:0.5}}},
+  ], 'Hole count', 'Electron Holes Per Window');
+
+  histPlot('hist-fpe-plot',[
+    {x:labels,y:recs.map(r=>r.fpe_kHz),mode:'lines+markers',name:'f_pe (kHz)',
+     line:{color:'#39ff14',width:1.5},marker:{size:3,color:'#39ff14'}},
+  ], 'f_pe (kHz)', 'Plasma Frequency Evolution');
+
+  // TSI Score
+  const colorMap = {ACTIVE:'#ff3e9d',PROBABLE:'#ff9f1c',POSSIBLE:'#f9c74f',QUIET:'#39ff14'};
+  histPlot('hist-score-plot',[
+    {x:labels, y:recs.map(r=>r.tsi_score||0), type:'bar', name:'TSI Activity Score',
+     marker:{color:recs.map(r=>colorMap[r.tsi_status]||'#4a6578'),
+             line:{color:'#0a0e1a',width:0.5}}},
+    {x:labels,y:recs.map(()=>7),mode:'lines',name:'ACTIVE threshold (7)',
+     line:{color:'#ff3e9d',width:1.5,dash:'dash'}},
+    {x:labels,y:recs.map(()=>4),mode:'lines',name:'PROBABLE threshold (4)',
+     line:{color:'#ff9f1c',width:1.2,dash:'dot'}},
+  ], 'Score (0–13)', 'TSI Activity Score Timeline');
+}
+
+// ── RENDER EVENTS ──────────────────────────────────────────────────────────
+async function renderEvents() {
+  const d = await loadJSON('results/mms_events.json');
+  const container = document.getElementById('events-container');
+  if (!container) return;
+  if (!d || !d.events || d.events.length === 0) return;
+
+  const events = [...d.events].reverse().slice(0,50); // most recent 50
+  const typeColors = {
+    HIGH_B_FIELD:             'event-high',
+    ELECTRON_HOLE_BURST:      'event-high',
+    HIGH_TEMPERATURE_ANISOTROPY: 'event-moderate',
+    ELECTRON_BEAM_DETECTED:   'event-moderate',
+    TSI_WEIBEL_CHAIN:         'event-moderate',
+    STEEP_TURBULENCE_SPECTRUM:'event-moderate',
+  };
+  const typeIcons = {
+    HIGH_B_FIELD:             '⚡',
+    ELECTRON_HOLE_BURST:      '🕳',
+    HIGH_TEMPERATURE_ANISOTROPY:'🧲',
+    ELECTRON_BEAM_DETECTED:   '⚡',
+    TSI_WEIBEL_CHAIN:         '🔗',
+    STEEP_TURBULENCE_SPECTRUM:'📉',
+  };
+
+  container.innerHTML = events.map(ev => `
+    <div class="event-card ${typeColors[ev.type]||'event-moderate'}">
+      <div class="event-time">
+        ${typeIcons[ev.type]||'•'}  ${ev.type.replace(/_/g,' ')}
+        &nbsp;·&nbsp; ${(ev.time||'').slice(0,16)} UTC
+        &nbsp;·&nbsp; <span style="color:${ev.severity==='HIGH'?'var(--pink)':'var(--amber)'}">
+          ${ev.severity||'MODERATE'}
+        </span>
+      </div>
+      <div class="event-type">${
+        ev.type === 'HIGH_B_FIELD'               ? 'Strong Magnetic Field Event' :
+        ev.type === 'ELECTRON_HOLE_BURST'         ? 'Electron Hole Burst — TSI Saturation' :
+        ev.type === 'HIGH_TEMPERATURE_ANISOTROPY' ? 'High Temperature Anisotropy — Weibel Conditions' :
+        ev.type === 'ELECTRON_BEAM_DETECTED'      ? 'Electron Beam — TSI Driver Present' :
+        ev.type === 'TSI_WEIBEL_CHAIN'            ? 'TSI → Weibel Energy Chain — Both Instabilities Active' :
+        ev.type === 'STEEP_TURBULENCE_SPECTRUM'   ? 'Steep Turbulence Spectrum — Enhanced Dissipation' :
+        ev.type
+      }</div>
+      <div class="event-body">${ev.explanation||''}</div>
+      <div style="margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:.73rem;color:var(--muted);">
+        ${Object.entries(ev.values||{}).map(([k,v])=>`${k} = ${v}`).join('  ·  ')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+async function initObservatory() {
+  await renderObservatory();
+  await renderHistory();
+  await renderEvents();
+}
+
+initObservatory();
+setInterval(initObservatory, 600_000);  // refresh every 10 minutes
+
+
+</script>
+</body>
+</html>
