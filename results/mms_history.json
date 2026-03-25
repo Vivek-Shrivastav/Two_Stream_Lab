@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-03-25T02:05:07.021874+00:00",
-  "n_records": 4,
+  "last_updated_utc": "2026-03-25T07:00:54.217045+00:00",
+  "n_records": 5,
   "records": [
     {
       "utc": "2026-03-24T07:27:35.749425+00:00",
@@ -78,6 +78,27 @@
       "Tratio": 0.719,
       "A": -0.281,
       "dfdv": 0.2669,
+      "n_holes": 0,
+      "beam": true,
+      "langmuir": false,
+      "chain": false,
+      "tsi_status": "POSSIBLE",
+      "tsi_score": 2,
+      "n_events": 2
+    },
+    {
+      "utc": "2026-03-25T07:00:54.217045+00:00",
+      "data_utc": "2025-12-25T01:00:54Z",
+      "B_mean_nT": 5.66,
+      "B_alpha": -2.278,
+      "Ne_cc": 2.586,
+      "fpe_kHz": 14.441,
+      "Ve_kms": 617.61,
+      "Tpar_eV": 15.62,
+      "Tperp_eV": 11.22,
+      "Tratio": 0.7305,
+      "A": -0.2695,
+      "dfdv": 0.2633,
       "n_holes": 0,
       "beam": true,
       "langmuir": false,
