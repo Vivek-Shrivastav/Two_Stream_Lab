@@ -3,8 +3,8 @@
 
 **Vivek Shrivastav · Sikkim University · 2025**
 
-[![MMS TSI Analyzer](https://github.com/Vivek-Shrivastav/Two_Stream_Instability/actions/workflows/analyze.yml/badge.svg)](https://github.com/Vivek-Shrivastav/Two_Stream_Instability/actions)
-[![Live Dashboard](https://img.shields.io/badge/Dashboard-Live-brightgreen)](https://vivek-shrivastav.github.io/Two_Stream_Instability/)
+[![MMS TSI Analyzer](https://github.com/Vivek-Shrivastav/Two_Stream_Lab/actions/workflows/analyze.yml/badge.svg)](https://github.com/Vivek-Shrivastav/Two_Stream_Lab/actions)
+[![Live Dashboard](https://img.shields.io/badge/Dashboard-Live-brightgreen)](https://vivek-shrivastav.github.io/Two_Stream_Lab/)
 
 ---
 
