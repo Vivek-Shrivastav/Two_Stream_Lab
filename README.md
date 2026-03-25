@@ -285,4 +285,4 @@ No API keys required. All data is publicly available.
 
 ---
 
-*For questions or collaboration: Sikkim University, Department of Physics*
+*For questions or collaboration: Vivek Shrivastav, Sikkim University, Department of Physics*
