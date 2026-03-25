@@ -1,1 +1,68 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
 Vivek Shrivastav. (2026). Vivek-Shrivastav/Two_Stream_Lab: Two-Stream Instability Observatory v1.0.0 (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.19224024
+type: software
+title: "Two-Stream Instability Observatory"
+abstract: >
+  An interactive web-based research and educational laboratory for the
+  two-stream plasma instability (TSI). Combines an interactive theory
+  laboratory (growth rate calculator, multi-regime dispersion comparison,
+  SMILEI PIC simulation data overlay, phase-space animation, simulation
+  box designer) with a live NASA MMS-1 spacecraft data observatory that
+  tests theoretical predictions against real magnetospheric measurements
+  every 6 hours via GitHub Actions.
+authors:
+  - family-names: Shrivastav
+    given-names: Vivek
+    affiliation: "Department of Physics, Sikkim University, Sikkim, India"
+    orcid: "0009-0003-6908-7263"
+version: "1.0.0"
+date-released: 2026-03-25   
+license: MIT
+repository-code: "https://github.com/Vivek-Shrivastav/Two_Stream_Lab"
+url: "https://vivek-shrivastav.github.io/Two_Stream_Lab/"
+keywords:
+  - plasma physics
+  - two-stream instability
+  - Weibel instability
+  - dispersion relation
+  - PIC simulation
+  - SMILEI
+  - MMS spacecraft
+  - NASA
+  - interactive simulation
+  - magnetosphere
+  - electron holes
+  - Langmuir waves
+references:
+  - type: article
+    title: "Two-Stream Instability: Analytical Growth Rates and PIC Validation"
+    authors:
+      - family-names: Shrivastav
+        given-names: Vivek
+    year: 2025
+    notes: "Sikkim University — in preparation / submitted"
+  - type: article
+    title: "Numerical simulation of plasmas with SMILEI"
+    authors:
+      - family-names: Derouillat
+        given-names: J.
+    journal: "Computer Physics Communications"
+    year: 2018
+    doi: "10.1016/j.cpc.2017.09.024"
+  - type: article
+    title: "Electron-beam instabilities in unmagnetized plasmas (two-stream)"
+    authors:
+      - family-names: Buneman
+        given-names: O.
+    journal: "Physical Review"
+    volume: 115
+    year: 1958
+  - type: article
+    title: "Spontaneously growing transverse waves in a plasma due to an anisotropic velocity distribution"
+    authors:
+      - family-names: Weibel
+        given-names: E. S.
+    journal: "Physical Review Letters"
+    volume: 2
+    year: 1959
