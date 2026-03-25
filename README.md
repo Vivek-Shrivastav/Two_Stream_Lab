@@ -286,3 +286,9 @@ No API keys required. All data is publicly available.
 ---
 
 *For questions or collaboration: Vivek Shrivastav, Sikkim University, Department of Physics*
+
+## Citation
+If you use this software, please cite it as:
+
+Vivek Shrivastav. (2026). Vivek-Shrivastav/Two_Stream_Lab: Two-Stream Instability Observatory v1.0.0 (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.19224024
+
