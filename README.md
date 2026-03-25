@@ -29,7 +29,7 @@ When two electron beams travel in opposite directions through each other (or one
 
 This positive slope in the velocity distribution function (bump-on-tail) allows the wave to extract energy from the beam, growing exponentially.
 
-**Growth rates from our paper (Shrivastav et al. 2025):**
+**Growth rates from our paper (Shrivastav et al. 2025 (https://arxiv.org/abs/2508.14362)):**
 
 | Equation | Regime | Formula |
 |---|---|---|
