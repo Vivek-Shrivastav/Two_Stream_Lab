@@ -15,9 +15,19 @@ tags:
 authors:
   - name: Vivek Shrivastav
     affiliation: 1
+  - name: Hemam D Singh
+    affiliation: 2
+  - name: Mani K Chettri
+    affiliation: 1
+  - name: Britan Singh
+    affiliation: 1
+  - name: Rupak Mukherjee
+    affiliation: 1
 affiliations:
-  - name: Department of Physics, Sikkim University, Sikkim, India
+  - name: Department of Physics, Sikkim University, Gangtok, India, 737102
     index: 1
+  - name: Department of Physics, Netaji Subhas University of Technology, New Delhi, India, 110078
+    index: 2
 date: 2025
 bibliography: paper.bib
 ---
