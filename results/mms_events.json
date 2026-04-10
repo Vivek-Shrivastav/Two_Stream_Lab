@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-04-09T19:04:53.275220+00:00",
-  "n_events": 80,
+  "last_updated_utc": "2026-04-10T02:27:10.628933+00:00",
+  "n_events": 81,
   "events": [
     {
       "type": "HIGH_B_FIELD",
@@ -785,6 +785,16 @@
         "n_holes": 98
       },
       "explanation": "98 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "HIGH",
+      "time": "2026-01-09T20:27:10Z",
+      "values": {
+        "B_max_nT": 2984.85,
+        "B_mean_nT": 1067.826
+      },
+      "explanation": "Unusually large magnetic field: B_max = 2984.8 nT (2.1\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
     }
   ]
 }
