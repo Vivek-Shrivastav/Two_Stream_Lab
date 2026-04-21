@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-04-21T07:47:52.271923+00:00",
-  "n_events": 137,
+  "last_updated_utc": "2026-04-21T13:23:40.183778+00:00",
+  "n_events": 139,
   "events": [
     {
       "type": "HIGH_B_FIELD",
@@ -1346,6 +1346,26 @@
         "Ve_max_kms": 971.5
       },
       "explanation": "Fast electron beam: mean V_e = 877.2 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.3156. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-01-21T07:23:40Z",
+      "values": {
+        "B_max_nT": 12.193,
+        "B_mean_nT": 7.843
+      },
+      "explanation": "Unusually large magnetic field: B_max = 12.2 nT (4.7\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "ELECTRON_BEAM_DETECTED",
+      "severity": "HIGH",
+      "time": "2026-01-21T07:23:40Z",
+      "values": {
+        "Ve_mean_kms": 757.56,
+        "Ve_max_kms": 972.2
+      },
+      "explanation": "Fast electron beam: mean V_e = 757.6 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.2615. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
     }
   ]
 }
