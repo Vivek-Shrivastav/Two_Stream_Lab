@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-04-26T13:03:19.501879+00:00",
-  "n_events": 173,
+  "last_updated_utc": "2026-04-26T18:52:48.476300+00:00",
+  "n_events": 174,
   "events": [
     {
       "type": "HIGH_B_FIELD",
@@ -1700,6 +1700,16 @@
         "B_mean_nT": 7.256
       },
       "explanation": "Unusually large magnetic field: B_max = 10.6 nT (3.9\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-01-26T12:52:48Z",
+      "values": {
+        "B_max_nT": 8.785,
+        "B_mean_nT": 6.149
+      },
+      "explanation": "Unusually large magnetic field: B_max = 8.8 nT (3.1\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
     }
   ]
 }
