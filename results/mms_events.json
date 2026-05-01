@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-05-01T13:16:04.147288+00:00",
-  "n_events": 197,
+  "last_updated_utc": "2026-05-01T19:09:24.630613+00:00",
+  "n_events": 200,
   "events": [
     {
       "type": "HIGH_B_FIELD",
@@ -1936,6 +1936,35 @@
         "B_mean_nT": 812.805
       },
       "explanation": "Unusually large magnetic field: B_max = 3027.3 nT (2.4\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-01-31T13:09:24Z",
+      "values": {
+        "B_max_nT": 10.22,
+        "B_mean_nT": 4.417
+      },
+      "explanation": "Unusually large magnetic field: B_max = 10.2 nT (7.0\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "ELECTRON_BEAM_DETECTED",
+      "severity": "MODERATE",
+      "time": "2026-01-31T13:09:24Z",
+      "values": {
+        "Ve_mean_kms": 406.43,
+        "Ve_max_kms": 501.6
+      },
+      "explanation": "Fast electron beam: mean V_e = 406.4 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.147. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "STEEP_TURBULENCE_SPECTRUM",
+      "severity": "MODERATE",
+      "time": "2026-01-31T13:09:24Z",
+      "values": {
+        "spectral_index": -2.603
+      },
+      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.603 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
     }
   ]
 }
