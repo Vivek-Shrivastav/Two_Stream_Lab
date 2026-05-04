@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-05-04T02:43:43.219288+00:00",
-  "n_events": 211,
+  "last_updated_utc": "2026-05-04T08:27:56.576317+00:00",
+  "n_events": 212,
   "events": [
     {
       "type": "HIGH_B_FIELD",
@@ -2075,6 +2075,15 @@
         "Ve_max_kms": 438.37
       },
       "explanation": "Fast electron beam: mean V_e = 372.3 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.1739. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "ELECTRON_HOLE_BURST",
+      "severity": "MODERATE",
+      "time": "2026-02-03T02:27:56Z",
+      "values": {
+        "n_holes": 10
+      },
+      "explanation": "10 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
     }
   ]
 }
