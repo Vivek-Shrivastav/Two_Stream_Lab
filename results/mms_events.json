@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-05-11T09:36:43.719954+00:00",
-  "n_events": 253,
+  "last_updated_utc": "2026-05-11T14:46:41.368883+00:00",
+  "n_events": 255,
   "events": [
     {
       "type": "HIGH_B_FIELD",
@@ -2484,6 +2484,25 @@
         "n_holes": 31
       },
       "explanation": "31 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-02-10T08:46:41Z",
+      "values": {
+        "B_max_nT": 240.793,
+        "B_mean_nT": 59.437
+      },
+      "explanation": "Unusually large magnetic field: B_max = 240.8 nT (3.6\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "STEEP_TURBULENCE_SPECTRUM",
+      "severity": "MODERATE",
+      "time": "2026-02-10T08:46:41Z",
+      "values": {
+        "spectral_index": -2.575
+      },
+      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.575 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
     }
   ]
 }
