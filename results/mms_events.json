@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-05-15T08:46:58.260309+00:00",
-  "n_events": 278,
+  "last_updated_utc": "2026-05-15T14:03:31.485893+00:00",
+  "n_events": 281,
   "events": [
     {
       "type": "HIGH_B_FIELD",
@@ -2731,6 +2731,34 @@
         "B_mean_nT": 1021.236
       },
       "explanation": "Unusually large magnetic field: B_max = 3264.7 nT (2.5\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-02-14T08:03:31Z",
+      "values": {
+        "B_max_nT": 290.289,
+        "B_mean_nT": 60.739
+      },
+      "explanation": "Unusually large magnetic field: B_max = 290.3 nT (3.5\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "ELECTRON_HOLE_BURST",
+      "severity": "MODERATE",
+      "time": "2026-02-14T08:03:31Z",
+      "values": {
+        "n_holes": 17
+      },
+      "explanation": "17 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
+    },
+    {
+      "type": "STEEP_TURBULENCE_SPECTRUM",
+      "severity": "MODERATE",
+      "time": "2026-02-14T08:03:31Z",
+      "values": {
+        "spectral_index": -2.598
+      },
+      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.598 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
     }
   ]
 }
