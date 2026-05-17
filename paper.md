@@ -54,7 +54,7 @@ Existing resources each address only part of the problem. Standalone PIC codes s
 
 # Theory Laboratory
 
-The laboratory implements four closed-form dispersion relations derived from the two-fluid equations for counter-propagating symmetric electron beams (Shrivastav et al., 2025, in preparation):
+The laboratory implements four closed-form dispersion relations derived from the two-fluid equations for counter-propagating symmetric electron beams [@Shrivastav2025]:
 
 **Equation 18 — Non-relativistic single-species (ions frozen):**
 $$\gamma = \sqrt{\frac{1}{2}\left[2v_0^2k^2 + \omega_p^2 - \sqrt{8v_0^2k^2\omega_p^2 + \omega_p^4}\right]}$$
