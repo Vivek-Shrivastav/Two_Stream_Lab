@@ -38,6 +38,14 @@ The two-stream instability (TSI) is a fundamental collective phenomenon in plasm
 
 The **Two-Stream Instability Observatory** is an open-source, browser-based research platform consisting of two tightly integrated components: a **Theory Laboratory** providing interactive exploration of exact analytical dispersion relations validated against SMILEI particle-in-cell (PIC) simulations [@Derouillat2018], and a **Live MMS Observatory** that downloads real NASA Magnetospheric Multiscale (MMS-1) spacecraft data every six hours and tests whether theoretical TSI conditions are active in the Earth's magnetosphere [@Burch2016].
 
+# State of the Field
+
+Plasma instability research tools currently exist in three disconnected categories. Interactive browser-based simulators such as those hosted at particleincell.com [@Verboncoeur2005] visualise particle dynamics but provide no analytical growth rate predictions and no connection to observational data. Full PIC codes — SMILEI [@Derouillat2018], OSIRIS [@Fonseca2002], EPOCH [@Arber2015] — deliver high-fidelity simulations but require HPC clusters, compiled environments, and significant post-processing expertise, placing them out of reach for most students and educators. On the observational side, NASA's CDAWeb and SPEDAS [@Angelopoulos2019] provide access to MMS and other spacecraft data but demand custom analysis pipelines and offer no integrated theoretical context.
+
+Dedicated TSI teaching tools are scarce. The Plasma Simulation Code (PSC) and similar open educational codes focus on 1D electrostatic simulations without real-data coupling. Review articles [@Bret2010] and textbooks present the dispersion theory analytically but provide no interactive computation. No existing resource simultaneously offers closed-form dispersion relations, PIC-validated growth rate curves, and automated live spacecraft data analysis in a single zero-install environment.
+
+The **Two-Stream Instability Observatory** fills this gap by integrating all three layers — interactive analytical theory, SMILEI PIC validation, and automated NASA MMS-1 data monitoring — into a single browser-based platform that requires no local installation.
+
 # Statement of Need
 
 Teaching and researching plasma instabilities presents a persistent challenge: the gap between analytical theory and observable data is wide, the mathematics is non-trivial, and computational tools (PIC codes, data reduction pipelines) require significant setup. No existing tool bridges all three simultaneously — interactive dispersion theory, PIC simulation comparison, and live spacecraft data validation — in a single zero-install environment.
