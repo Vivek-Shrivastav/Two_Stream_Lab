@@ -1,17 +1,7 @@
 {
-  "last_updated_utc": "2026-07-02T19:21:27.012948+00:00",
+  "last_updated_utc": "2026-07-03T02:48:15.181032+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "ELECTRON_BEAM_DETECTED",
-      "severity": "HIGH",
-      "time": "2025-12-24T20:05:07Z",
-      "values": {
-        "Ve_mean_kms": 629.97,
-        "Ve_max_kms": 701.46
-      },
-      "explanation": "Fast electron beam: mean V_e = 630.0 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.2669. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
-    },
     {
       "type": "HIGH_B_FIELD",
       "severity": "MODERATE",
@@ -4926,6 +4916,16 @@
         "Ve_max_kms": 722.38
       },
       "explanation": "Fast electron beam: mean V_e = 644.0 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.2074. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "ELECTRON_BEAM_DETECTED",
+      "severity": "HIGH",
+      "time": "2026-04-03T20:48:15Z",
+      "values": {
+        "Ve_mean_kms": 675.22,
+        "Ve_max_kms": 783.8
+      },
+      "explanation": "Fast electron beam: mean V_e = 675.2 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.2258. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
     }
   ]
 }
