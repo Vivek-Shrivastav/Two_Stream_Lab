@@ -1,27 +1,7 @@
 {
-  "last_updated_utc": "2026-07-14T02:21:12.695091+00:00",
+  "last_updated_utc": "2026-07-14T08:00:10.952358+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "ELECTRON_BEAM_DETECTED",
-      "severity": "MODERATE",
-      "time": "2025-12-30T20:12:12Z",
-      "values": {
-        "Ve_mean_kms": 480.32,
-        "Ve_max_kms": 552.6
-      },
-      "explanation": "Fast electron beam: mean V_e = 480.3 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.2172. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
-    },
-    {
-      "type": "ELECTRON_BEAM_DETECTED",
-      "severity": "MODERATE",
-      "time": "2025-12-31T01:12:12Z",
-      "values": {
-        "Ve_mean_kms": 497.25,
-        "Ve_max_kms": 556.9
-      },
-      "explanation": "Fast electron beam: mean V_e = 497.2 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.2194. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
-    },
     {
       "type": "ELECTRON_BEAM_DETECTED",
       "severity": "MODERATE",
@@ -4928,6 +4908,26 @@
         "spectral_index": -2.512
       },
       "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.512 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "HIGH",
+      "time": "2026-04-15T02:00:10Z",
+      "values": {
+        "B_max_nT": 2569.39,
+        "B_mean_nT": 818.585
+      },
+      "explanation": "Unusually large magnetic field: B_max = 2569.4 nT (2.1\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "HIGH_TEMPERATURE_ANISOTROPY",
+      "severity": "MODERATE",
+      "time": "2026-04-15T02:00:10Z",
+      "values": {
+        "A": 0.3021,
+        "Tratio": 1.3021
+      },
+      "explanation": "High electron temperature anisotropy: A = T\u22a5/T\u2225 \u2212 1 = 0.302. This drives the Weibel instability \u2014 electrons preferentially heated in the perpendicular direction spontaneously form current filaments that generate magnetic fields. This can follow TSI saturation when Langmuir waves scatter beam electrons into perpendicular velocities."
     }
   ]
 }
