@@ -1,26 +1,7 @@
 {
-  "last_updated_utc": "2026-07-21T13:44:37.258385+00:00",
+  "last_updated_utc": "2026-07-21T19:18:21.792543+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "ELECTRON_HOLE_BURST",
-      "severity": "HIGH",
-      "time": "2026-01-13T02:01:27Z",
-      "values": {
-        "n_holes": 115
-      },
-      "explanation": "115 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
-    },
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "HIGH",
-      "time": "2026-01-13T07:23:28Z",
-      "values": {
-        "B_max_nT": 3151.97,
-        "B_mean_nT": 985.49
-      },
-      "explanation": "Unusually large magnetic field: B_max = 3152.0 nT (2.4\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
     {
       "type": "HIGH_B_FIELD",
       "severity": "MODERATE",
@@ -4932,6 +4913,24 @@
         "n_holes": 35
       },
       "explanation": "35 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
+    },
+    {
+      "type": "ELECTRON_HOLE_BURST",
+      "severity": "HIGH",
+      "time": "2026-04-22T13:18:21Z",
+      "values": {
+        "n_holes": 92
+      },
+      "explanation": "92 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
+    },
+    {
+      "type": "STEEP_TURBULENCE_SPECTRUM",
+      "severity": "MODERATE",
+      "time": "2026-04-22T13:18:21Z",
+      "values": {
+        "spectral_index": -2.669
+      },
+      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.669 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
     }
   ]
 }
