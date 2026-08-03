@@ -1,27 +1,7 @@
 {
-  "last_updated_utc": "2026-08-03T02:37:12.019562+00:00",
+  "last_updated_utc": "2026-08-03T09:39:36.462481+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "HIGH",
-      "time": "2026-01-27T07:49:40Z",
-      "values": {
-        "B_max_nT": 2762.72,
-        "B_mean_nT": 382.664
-      },
-      "explanation": "Unusually large magnetic field: B_max = 2762.7 nT (3.9\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "HIGH",
-      "time": "2026-01-27T13:19:05Z",
-      "values": {
-        "B_max_nT": 2946.26,
-        "B_mean_nT": 881.613
-      },
-      "explanation": "Unusually large magnetic field: B_max = 2946.3 nT (2.1\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
     {
       "type": "HIGH_B_FIELD",
       "severity": "MODERATE",
@@ -4932,6 +4912,25 @@
         "Ve_max_kms": 482.83
       },
       "explanation": "Fast electron beam: mean V_e = 421.2 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.1843. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-05-05T03:39:36Z",
+      "values": {
+        "B_max_nT": 14.793,
+        "B_mean_nT": 11.051
+      },
+      "explanation": "Unusually large magnetic field: B_max = 14.8 nT (4.5\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "STEEP_TURBULENCE_SPECTRUM",
+      "severity": "MODERATE",
+      "time": "2026-05-05T03:39:36Z",
+      "values": {
+        "spectral_index": -3.343
+      },
+      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -3.343 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
     }
   ]
 }
