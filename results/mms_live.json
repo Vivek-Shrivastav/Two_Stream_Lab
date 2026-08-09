@@ -1,8 +1,8 @@
 {
-  "fetched_utc": "2026-08-09T06:52:27.703964+00:00",
+  "fetched_utc": "2026-08-09T12:44:19.314295+00:00",
   "data_window_utc": [
-    "2026-05-11T00:52:27Z",
-    "2026-05-11T06:52:27Z"
+    "2026-05-11T06:44:19Z",
+    "2026-05-11T12:44:19Z"
   ],
   "data_window_note": "MMS L2 data ~90 days behind real-time",
   "spacecraft": "MMS-1",
