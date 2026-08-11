@@ -1,27 +1,7 @@
 {
-  "last_updated_utc": "2026-08-11T07:02:51.431281+00:00",
+  "last_updated_utc": "2026-08-11T12:58:33.784864+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "MODERATE",
-      "time": "2026-02-05T13:44:00Z",
-      "values": {
-        "B_max_nT": 10.741,
-        "B_mean_nT": 9.046
-      },
-      "explanation": "Unusually large magnetic field: B_max = 10.7 nT (4.2\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "MODERATE",
-      "time": "2026-02-05T20:43:37Z",
-      "values": {
-        "B_max_nT": 9.271,
-        "B_mean_nT": 6.74
-      },
-      "explanation": "Unusually large magnetic field: B_max = 9.3 nT (6.6\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
     {
       "type": "HIGH_B_FIELD",
       "severity": "MODERATE",
@@ -4928,6 +4908,25 @@
         "B_mean_nT": 26.395
       },
       "explanation": "Unusually large magnetic field: B_max = 54.7 nT (3.2\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "HIGH",
+      "time": "2026-05-13T06:58:33Z",
+      "values": {
+        "B_max_nT": 2118.22,
+        "B_mean_nT": 657.49
+      },
+      "explanation": "Unusually large magnetic field: B_max = 2118.2 nT (1.9\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "ELECTRON_HOLE_BURST",
+      "severity": "HIGH",
+      "time": "2026-05-13T06:58:33Z",
+      "values": {
+        "n_holes": 41
+      },
+      "explanation": "41 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
     }
   ]
 }
