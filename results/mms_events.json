@@ -1,17 +1,7 @@
 {
-  "last_updated_utc": "2026-08-12T18:58:43.722045+00:00",
+  "last_updated_utc": "2026-08-13T01:48:15.045618+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "MODERATE",
-      "time": "2026-02-07T13:15:15Z",
-      "values": {
-        "B_max_nT": 41.454,
-        "B_mean_nT": 9.615
-      },
-      "explanation": "Unusually large magnetic field: B_max = 41.5 nT (5.8\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
     {
       "type": "ELECTRON_HOLE_BURST",
       "severity": "MODERATE",
@@ -4930,6 +4920,16 @@
         "Ve_max_kms": 482.62
       },
       "explanation": "Fast electron beam: mean V_e = 430.8 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.1296. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-05-14T19:48:15Z",
+      "values": {
+        "B_max_nT": 7.775,
+        "B_mean_nT": 3.941
+      },
+      "explanation": "Unusually large magnetic field: B_max = 7.8 nT (4.1\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
     }
   ]
 }
