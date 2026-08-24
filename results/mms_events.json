@@ -1,37 +1,7 @@
 {
-  "last_updated_utc": "2026-08-23T18:25:26.195341+00:00",
+  "last_updated_utc": "2026-08-24T01:08:36.233794+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "MODERATE",
-      "time": "2026-02-18T13:50:06Z",
-      "values": {
-        "B_max_nT": 7.318,
-        "B_mean_nT": 4.963
-      },
-      "explanation": "Unusually large magnetic field: B_max = 7.3 nT (4.7\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
-    {
-      "type": "ELECTRON_BEAM_DETECTED",
-      "severity": "MODERATE",
-      "time": "2026-02-18T13:50:06Z",
-      "values": {
-        "Ve_mean_kms": 520.42,
-        "Ve_max_kms": 602.68
-      },
-      "explanation": "Fast electron beam: mean V_e = 520.4 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.1863. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
-    },
-    {
-      "type": "ELECTRON_BEAM_DETECTED",
-      "severity": "MODERATE",
-      "time": "2026-02-18T21:26:21Z",
-      "values": {
-        "Ve_mean_kms": 505.21,
-        "Ve_max_kms": 585.97
-      },
-      "explanation": "Fast electron beam: mean V_e = 505.2 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.1859. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
-    },
     {
       "type": "HIGH_B_FIELD",
       "severity": "MODERATE",
@@ -4930,6 +4900,35 @@
         "B_mean_nT": 6.072
       },
       "explanation": "Unusually large magnetic field: B_max = 9.6 nT (3.3\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-05-25T19:08:36Z",
+      "values": {
+        "B_max_nT": 11.32,
+        "B_mean_nT": 7.957
+      },
+      "explanation": "Unusually large magnetic field: B_max = 11.3 nT (3.6\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "ELECTRON_BEAM_DETECTED",
+      "severity": "MODERATE",
+      "time": "2026-05-25T19:08:36Z",
+      "values": {
+        "Ve_mean_kms": 398.34,
+        "Ve_max_kms": 456.24
+      },
+      "explanation": "Fast electron beam: mean V_e = 398.3 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.1393. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "STEEP_TURBULENCE_SPECTRUM",
+      "severity": "MODERATE",
+      "time": "2026-05-25T19:08:36Z",
+      "values": {
+        "spectral_index": -2.9
+      },
+      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.900 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
     }
   ]
 }
