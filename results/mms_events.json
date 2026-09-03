@@ -1,28 +1,7 @@
 {
-  "last_updated_utc": "2026-09-03T10:40:29.431687+00:00",
+  "last_updated_utc": "2026-09-03T15:47:07.053570+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "ELECTRON_BEAM_DETECTED",
-      "severity": "HIGH",
-      "time": "2026-02-28T03:51:32Z",
-      "values": {
-        "Ve_mean_kms": 835.02,
-        "Ve_max_kms": 38640.04
-      },
-      "explanation": "Fast electron beam: mean V_e = 835.0 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.0263. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
-    },
-    {
-      "type": "TSI_WEIBEL_CHAIN",
-      "severity": "MODERATE",
-      "time": "2026-02-28T03:51:32Z",
-      "values": {
-        "v0_over_c": 0.002783,
-        "A": 0.2273,
-        "predicted_gamma": 0.35355
-      },
-      "explanation": "Both TSI and Weibel conditions are simultaneously active. PIC simulations (Innocenti et al. 2017) show: beam drives Langmuir waves \u2192 Langmuir waves scatter electrons into \u22a5 direction \u2192 builds T\u22a5 > T\u2225 \u2192 drives Weibel electromagnetic waves. This is one of the first observational windows where this chain may be directly tested with MMS data."
-    },
     {
       "type": "HIGH_B_FIELD",
       "severity": "HIGH",
@@ -4921,6 +4900,26 @@
         "B_mean_nT": 14.101
       },
       "explanation": "Unusually large magnetic field: B_max = 30.2 nT (5.9\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-06-05T09:47:07Z",
+      "values": {
+        "B_max_nT": 27.061,
+        "B_mean_nT": 15.014
+      },
+      "explanation": "Unusually large magnetic field: B_max = 27.1 nT (4.7\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "ELECTRON_BEAM_DETECTED",
+      "severity": "HIGH",
+      "time": "2026-06-05T09:47:07Z",
+      "values": {
+        "Ve_mean_kms": 605.3,
+        "Ve_max_kms": 644.74
+      },
+      "explanation": "Fast electron beam: mean V_e = 605.3 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.1974. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
     }
   ]
 }
