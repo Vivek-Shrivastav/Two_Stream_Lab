@@ -1,17 +1,7 @@
 {
-  "last_updated_utc": "2026-09-18T10:34:54.090766+00:00",
+  "last_updated_utc": "2026-09-18T15:50:16.376092+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "MODERATE",
-      "time": "2026-03-23T03:47:20Z",
-      "values": {
-        "B_max_nT": 7.961,
-        "B_mean_nT": 5.362
-      },
-      "explanation": "Unusually large magnetic field: B_max = 8.0 nT (5.3\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
     {
       "type": "ELECTRON_BEAM_DETECTED",
       "severity": "HIGH",
@@ -4912,6 +4902,16 @@
         "B_mean_nT": 14.412
       },
       "explanation": "Unusually large magnetic field: B_max = 33.7 nT (3.8\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "MODERATE",
+      "time": "2026-06-20T09:50:16Z",
+      "values": {
+        "B_max_nT": 30.66,
+        "B_mean_nT": 15.182
+      },
+      "explanation": "Unusually large magnetic field: B_max = 30.7 nT (3.6\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
     }
   ]
 }
