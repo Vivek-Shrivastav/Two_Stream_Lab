@@ -1,17 +1,7 @@
 {
-  "last_updated_utc": "2026-09-19T03:10:40.517304+00:00",
+  "last_updated_utc": "2026-09-19T10:19:07.452880+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "HIGH_B_FIELD",
-      "severity": "MODERATE",
-      "time": "2026-03-23T13:27:11Z",
-      "values": {
-        "B_max_nT": 7.51,
-        "B_mean_nT": 5.025
-      },
-      "explanation": "Unusually large magnetic field: B_max = 7.5 nT (4.8\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
-    },
     {
       "type": "HIGH_B_FIELD",
       "severity": "MODERATE",
@@ -4910,6 +4900,16 @@
         "spectral_index": -2.509
       },
       "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.509 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
+    },
+    {
+      "type": "HIGH_B_FIELD",
+      "severity": "HIGH",
+      "time": "2026-06-21T04:19:07Z",
+      "values": {
+        "B_max_nT": 2000.45,
+        "B_mean_nT": 891.076
+      },
+      "explanation": "Unusually large magnetic field: B_max = 2000.5 nT (1.8\u03c3 above mean). Possible causes: magnetospheric compression, flux tube boundary, current sheet crossing, or reconnection inflow region."
     }
   ]
 }
