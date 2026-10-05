@@ -1,16 +1,7 @@
 {
-  "last_updated_utc": "2026-10-05T13:37:52.518174+00:00",
+  "last_updated_utc": "2026-10-05T23:44:29.964042+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "STEEP_TURBULENCE_SPECTRUM",
-      "severity": "MODERATE",
-      "time": "2026-04-14T13:20:37Z",
-      "values": {
-        "spectral_index": -2.613
-      },
-      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.613 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
-    },
     {
       "type": "ELECTRON_HOLE_BURST",
       "severity": "HIGH",
@@ -4893,6 +4884,15 @@
         "Ve_max_kms": 519.16
       },
       "explanation": "Fast electron beam: mean V_e = 353.8 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.0918. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "STEEP_TURBULENCE_SPECTRUM",
+      "severity": "MODERATE",
+      "time": "2026-07-07T17:44:29Z",
+      "values": {
+        "spectral_index": -2.525
+      },
+      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.525 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
     }
   ]
 }
