@@ -1,25 +1,7 @@
 {
-  "last_updated_utc": "2026-11-08T12:45:46.497751+00:00",
+  "last_updated_utc": "2026-11-08T21:40:26.340145+00:00",
   "n_events": 500,
   "events": [
-    {
-      "type": "ELECTRON_HOLE_BURST",
-      "severity": "HIGH",
-      "time": "2026-05-02T13:20:56Z",
-      "values": {
-        "n_holes": 25
-      },
-      "explanation": "25 electron holes (bipolar E\u2225 events) detected in 6 hours. This is unusually high activity, indicating an active or recently saturated two-stream instability. These phase-space vortices are the direct nonlinear saturation products of Langmuir wave trapping (Bernstein et al. 1957, Graham et al. 2016 GRL)."
-    },
-    {
-      "type": "STEEP_TURBULENCE_SPECTRUM",
-      "severity": "MODERATE",
-      "time": "2026-05-02T13:20:56Z",
-      "values": {
-        "spectral_index": -2.549
-      },
-      "explanation": "Unusually steep magnetic power spectrum: \u03b1 = -2.549 (much steeper than Kolmogorov \u03b1 = -5/3 = -1.667). This indicates enhanced dissipation at sub-ion scales, possibly due to Landau damping of kinetic Alfv\u00e9n waves or reconnection-driven turbulence. Active Langmuir/TSI waves can inject energy into the perpendicular direction, feeding into the turbulent cascade."
-    },
     {
       "type": "HIGH_B_FIELD",
       "severity": "HIGH",
@@ -4868,6 +4850,27 @@
         "Ve_max_kms": 47491.88
       },
       "explanation": "Fast electron beam: mean V_e = 10510.2 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.1682. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "ELECTRON_BEAM_DETECTED",
+      "severity": "HIGH",
+      "time": "2026-08-10T15:40:26Z",
+      "values": {
+        "Ve_mean_kms": 4930.81,
+        "Ve_max_kms": 44841.61
+      },
+      "explanation": "Fast electron beam: mean V_e = 4930.8 km/s > 300 km/s threshold. Ratio v_beam/v_th = 0.137. When v_beam >> v_thermal, the electron velocity distribution function develops a positive slope df/dv > 0 at v_phase = \u03c9_pe/k, which is the classical two-stream instability condition. Theory (Eq.18) predicts maximum growth rate \u03b3_max at k_res = \u03c9_pe/v_beam."
+    },
+    {
+      "type": "TSI_WEIBEL_CHAIN",
+      "severity": "MODERATE",
+      "time": "2026-08-10T15:40:26Z",
+      "values": {
+        "v0_over_c": 0.016436,
+        "A": 0.2931,
+        "predicted_gamma": 0.35355
+      },
+      "explanation": "Both TSI and Weibel conditions are simultaneously active. PIC simulations (Innocenti et al. 2017) show: beam drives Langmuir waves \u2192 Langmuir waves scatter electrons into \u22a5 direction \u2192 builds T\u22a5 > T\u2225 \u2192 drives Weibel electromagnetic waves. This is one of the first observational windows where this chain may be directly tested with MMS data."
     }
   ]
 }
