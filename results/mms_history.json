@@ -1,28 +1,7 @@
 {
-  "last_updated_utc": "2026-11-11T13:33:52.013047+00:00",
+  "last_updated_utc": "2026-11-12T00:02:58.099164+00:00",
   "n_records": 720,
   "records": [
-    {
-      "utc": "2026-05-06T08:24:57.332391+00:00",
-      "data_utc": "2026-02-05T02:24:57Z",
-      "B_mean_nT": null,
-      "B_alpha": null,
-      "Ne_cc": null,
-      "fpe_kHz": null,
-      "Ve_kms": 488.16,
-      "Tpar_eV": 8.82,
-      "Tperp_eV": 7.16,
-      "Tratio": 0.8136,
-      "A": -0.1864,
-      "dfdv": 0.277,
-      "n_holes": null,
-      "beam": true,
-      "langmuir": false,
-      "chain": false,
-      "tsi_status": "POSSIBLE",
-      "tsi_score": 2,
-      "n_events": 1
-    },
     {
       "utc": "2026-05-06T14:06:51.988226+00:00",
       "data_utc": "2026-02-05T08:06:51Z",
@@ -15121,6 +15100,27 @@
       "tsi_status": "QUIET",
       "tsi_score": 0,
       "n_events": 1
+    },
+    {
+      "utc": "2026-11-12T00:02:58.099164+00:00",
+      "data_utc": "2026-08-13T18:02:58Z",
+      "B_mean_nT": 27.897,
+      "B_alpha": -0.904,
+      "Ne_cc": null,
+      "fpe_kHz": null,
+      "Ve_kms": null,
+      "Tpar_eV": null,
+      "Tperp_eV": null,
+      "Tratio": null,
+      "A": null,
+      "dfdv": null,
+      "n_holes": null,
+      "beam": false,
+      "langmuir": false,
+      "chain": false,
+      "tsi_status": "QUIET",
+      "tsi_score": 0,
+      "n_events": 0
     }
   ]
 }
